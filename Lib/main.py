@@ -29,7 +29,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         # self.comboBox.currentIndexChanged.connect(self.updateplot)
         # self.comboBox_2.currentIndexChanged.connect(self.updateplot_2)
         # self.comboBox_3.currentIndexChanged.connect(self.updateplot_3)
-        #self.showMaximized()
+        self.showMaximized()
         self.tabWidget.currentChanged.connect(self.tabChanged)
         # 定时器，定时更新数据
         self.timer = QTimer()
@@ -44,6 +44,48 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
 
     def init(self):
+        ls=['x轴振动速度RMS平均值', 'y轴振动速度RMS平均值', 'z轴振动速度RMS平均值', 'x轴振动加速度RMS平均值', 'y轴振动加速度RMS平均值', 'z轴振动加速度RMS平均值', 'x轴振动速度最大值–峰值', 'x轴振动速度峭度平均值', 'x轴振动加速度最大值-峰值', 'x轴振动加速度峭度平均值', 'y轴振动速度最大值–峰值', 'y轴振动速度峭度平均值', 'y轴振动加速度最大值-峰值', 'y轴振动加速度峭度平均值', 'z轴振动速度最大值–峰值', 'z轴振动速度峭度平均值', 'z轴振动加速度最大值-峰值', 'z轴振动加速度峭度平均值', 'x轴振动位移峰峰值', 'y轴振动位移峰峰值', 'z轴振动位移峰峰值',]
+
+        self.comboBox.addItem('振动温度一体传感器时域数据2208')
+        self.comboBox.addItem('振动温度一体传感器谱分析数据2208')
+        self.comboBox.addItem('振动温度一体传感器参数设置2210')
+
+        self.table1 = QtWidgets.QTableWidget()
+        self.table1.setRowCount(4)
+        self.table1.setColumnCount(12)
+        #self.table1.setHorizontalHeaderLabels(['名称1', '数值1'])
+        row = 0
+        col = 0
+        for i in range(len(ls)):
+            item = QtWidgets.QTableWidgetItem(ls[i])
+            self.table1.setItem(row, col, item)
+            if col == 4 or col == 6 or col == 8:
+                if row < 3:
+                    row += 1
+                else:
+                    row = 0
+                    col += 2
+            else:
+                if row < 2:
+                    row += 1
+                else:
+                    row = 0
+                    col += 2
+        self.table1.verticalHeader().setVisible(False)
+        self.table1.horizontalHeader().setVisible(False)
+        self.table1.resizeColumnsToContents()
+        self.table1.resizeRowsToContents()
+        header = self.table1.horizontalHeader()
+        header.setMinimumSectionSize(50)
+        self.table1.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        #self.table1.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        #self.stackedWidget.resize(800, 1200)
+
+        self.stackedWidget.removeWidget(self.stackedWidget.widget(0))  # 删除页面0
+        self.stackedWidget.removeWidget(self.stackedWidget.widget(0))  # 删除页面1
+        self.stackedWidget.addWidget(self.table1)
+        #self.stackedWidget.setCurrentIndex(2)
+
         pg.setConfigOptions(antialias=True)
         self.plot = pg.PlotWidget()
         self.plot_2 = pg.PlotWidget()
@@ -85,25 +127,6 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         # 设置时间轴单位为毫秒
         self.plot_3.setLabel('bottom', 'Time', units='ms')
 
-        self.label_7.setText('0')
-        self.label_8.setText('0')
-        self.label_9.setText('0')
-        self.label_10.setText('0')
-        self.label_11.setText('0')
-        self.label_18.setText('0')
-        self.label_12.setText('0')
-        self.label_19.setText('0')
-        self.label_20.setText('0')
-
-        self.label_7.setFixedWidth(50)
-        self.label_8.setFixedWidth(50)
-        self.label_9.setFixedWidth(50)
-        self.label_10.setFixedWidth(50)
-        self.label_11.setFixedWidth(50)
-        self.label_18.setFixedWidth(50)
-        self.label_12.setFixedWidth(50)
-        self.label_19.setFixedWidth(50)
-        self.label_20.setFixedWidth(50)
 
         #self.label_7.setStyleSheet("QLabel { background-color: #FFC0CB; color: black; text-shadow: 1px 1px #000000; }")
 
@@ -111,28 +134,18 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         # self.label.setStyleSheet(
         #     "QLabel {background-color: #696969; color: #333333; border: 1px solid #A9A9A9; padding: 5px;}")
         #background-color 表示背景颜色，color 表示字体颜色，border 表示边框样式和颜色，padding 表示文本与边框的距离
-        self.comboBox.addItem('x轴振动速度')
-        self.comboBox.addItem('x轴振动加速度')
-        self.comboBox.addItem('x轴位移')
-        self.comboBox_2.addItem('y轴振动速度')
-        self.comboBox_2.addItem('y轴振动加速度')
-        self.comboBox_2.addItem('y轴位移')
-        self.comboBox_3.addItem('z轴振动速度')
-        self.comboBox_3.addItem('z轴振动加速度')
-        self.comboBox_3.addItem('z轴位移')
+        self.comboBox_2.addItem('x轴振动速度')
+        self.comboBox_2.addItem('x轴振动加速度')
+        self.comboBox_2.addItem('x轴位移')
+        self.comboBox_3.addItem('y轴振动速度')
+        self.comboBox_3.addItem('y轴振动加速度')
+        self.comboBox_3.addItem('y轴位移')
+        self.comboBox_4.addItem('z轴振动速度')
+        self.comboBox_4.addItem('z轴振动加速度')
+        self.comboBox_4.addItem('z轴位移')
 
         self.pushButton.setText('Select File')
         self.pushButton.clicked.connect(self.showFileDialog)
-
-        self.light_green()
-
-    def light_green(self):
-        pixmap = QPixmap('green.png')
-        self.label_13.setPixmap(pixmap)
-
-    def light_red(self):
-        pixmap = QPixmap('red.png')
-        self.label_13.setPixmap(pixmap)
 
     def tabChanged(self,index):
         if index == 0:
@@ -157,9 +170,9 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             self.label_20.setText(str(self.shared_data['shard'][21]))
 
     def update_plotdata(self):
-        xtext = self.comboBox.currentText()
-        ytext = self.comboBox_2.currentText()
-        ztext = self.comboBox_3.currentText()
+        xtext = self.comboBox_2.currentText()
+        ytext = self.comboBox_3.currentText()
+        ztext = self.comboBox_4.currentText()
         if xtext == 'x轴振动速度':
             xi=2
         if xtext == 'x轴振动加速度':
