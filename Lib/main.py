@@ -26,8 +26,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         # self.comboBox.currentIndexChanged.connect(self.updateplot)
         # self.comboBox_2.currentIndexChanged.connect(self.updateplot_2)
         # self.comboBox_3.currentIndexChanged.connect(self.updateplot_3)
-        self.showMaximized()
+
         self.tabWidget.currentChanged.connect(self.tabChanged)
+        self.comboBox.activated.connect(self.stackedWidget.setCurrentIndex)
+        self.showMaximized()
         # 定时器，定时更新数据
         self.timer = QTimer()
         self.timer.setInterval(100)
@@ -45,17 +47,16 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
         self.comboBox.addItem('振动温度一体传感器时域数据2208')
         self.comboBox.addItem('振动温度一体传感器谱分析数据2208')
-        self.comboBox.addItem('振动温度一体传感器参数设置2210')
+        #self.comboBox.addItem('振动温度一体传感器参数设置2210')
 
-        self.table1 = QtWidgets.QTableWidget()
-        self.table1.setRowCount(4)
-        self.table1.setColumnCount(12)
-        #self.table1.setHorizontalHeaderLabels(['名称1', '数值1'])
+        self.tableWidget.setRowCount(4)
+        self.tableWidget.setColumnCount(12)
+        #self.tableWidget.setHorizontalHeaderLabels(['名称1', '数值1'])
         row = 0
         col = 0
         for i in range(len(ls)):
             item = QtWidgets.QTableWidgetItem(ls[i])
-            self.table1.setItem(row, col, item)
+            self.tableWidget.setItem(row, col, item)
             if col == 4 or col == 6 or col == 8:
                 if row < 3:
                     row += 1
@@ -68,21 +69,23 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                 else:
                     row = 0
                     col += 2
-        self.table1.verticalHeader().setVisible(False)
-        self.table1.horizontalHeader().setVisible(False)
-        self.table1.resizeColumnsToContents()
-        #self.table1.resizeRowsToContents()
-        header = self.table1.horizontalHeader()
+        self.tableWidget.verticalHeader().setVisible(False)
+        self.tableWidget.horizontalHeader().setVisible(False)
+        self.tableWidget.resizeColumnsToContents()
+        self.tableWidget.resizeRowsToContents()
+        header = self.tableWidget.horizontalHeader()
         header.setMinimumSectionSize(100)
 
-        #self.table1.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        #self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         #self.stackedWidget.resize(800, 1200)
 
-        self.stackedWidget.removeWidget(self.stackedWidget.widget(0))  # 删除页面0
-        self.stackedWidget.removeWidget(self.stackedWidget.widget(0))  # 删除页面1
-        self.stackedWidget.addWidget(self.table1)
+        # self.stackedWidget.removeWidget(self.stackedWidget.widget(0))  # 删除页面0
+        # self.stackedWidget.removeWidget(self.stackedWidget.widget(0))  # 删除页面1
+        # self.stackedWidget.addWidget(self.tableWidget)
         #self.stackedWidget.setCurrentIndex(2)
-        self.table1.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        #self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+
         pg.setConfigOptions(antialias=True)
         self.plot = pg.PlotWidget()
         self.plot_2 = pg.PlotWidget()
@@ -156,15 +159,37 @@ class DemoMain(QMainWindow, Ui_MainWindow):
     def updateData(self):
         # if len(self.shared_data['shard'])>=20:
         if type(self.shared_data['shard'])==list:
-            self.label_7.setText(str(self.shared_data['shard'][0]))
-            self.label_8.setText(str(self.shared_data['shard'][1]))
-            self.label_9.setText(str(self.shared_data['shard'][2]))
-            self.label_10.setText(str(self.shared_data['shard'][4]))
-            self.label_11.setText(str(self.shared_data['shard'][5]))
-            self.label_18.setText(str(self.shared_data['shard'][6]))
-            self.label_12.setText(str(self.shared_data['shard'][19]))
-            self.label_19.setText(str(self.shared_data['shard'][20]))
-            self.label_20.setText(str(self.shared_data['shard'][21]))
+            # self.label_7.setText(str(self.shared_data['shard'][0]))
+            # self.label_8.setText(str(self.shared_data['shard'][1]))
+            # self.label_9.setText(str(self.shared_data['shard'][2]))
+            # self.label_10.setText(str(self.shared_data['shard'][4]))
+            # self.label_11.setText(str(self.shared_data['shard'][5]))
+            # self.label_18.setText(str(self.shared_data['shard'][6]))
+            # self.label_12.setText(str(self.shared_data['shard'][19]))
+            # self.label_19.setText(str(self.shared_data['shard'][20]))
+            # self.label_20.setText(str(self.shared_data['shard'][21]))
+            row = 0
+            col = 1
+            for i in range(22):
+                if i==3:
+                    pass
+                else:
+                    print(1)
+                    item = QtWidgets.QTableWidgetItem(str(self.shared_data['shard'][i]))
+                    self.tableWidget.setItem(row, col, item)
+                    print(row, col, item)
+                    if col == 5 or col == 7 or col == 9:
+                        if row < 3:
+                            row += 1
+                        else:
+                            row = 0
+                            col += 2
+                    else:
+                        if row < 2:
+                            row += 1
+                        else:
+                            row = 0
+                            col += 2
 
     def update_plotdata(self):
         xtext = self.comboBox_2.currentText()

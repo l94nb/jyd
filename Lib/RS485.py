@@ -92,7 +92,7 @@ def smodbus03or04(recvdata, valueformat=0, intsigned=False):
             num = int.from_bytes(num, byteorder="big", signed=False)
             num = num / 100
             ls.append(num)
-       # print(ls)
+        # print(ls)
         return ls
     elif valueformat == 1:
         pass
