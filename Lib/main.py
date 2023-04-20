@@ -14,10 +14,7 @@ from scipy.signal import savgol_filter
 import scipy.io as sio
 from scipy.fft import fft, fftfreq
 import numpy as np
-# data=list(RS485.communcation(1))
-# data=data[3:-2]
-# print(data)
-# print(len(data))
+
 class DemoMain(QMainWindow, Ui_MainWindow):
     def __init__(self, shared_data):
         # 初始化父类
