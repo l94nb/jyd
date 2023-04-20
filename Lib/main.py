@@ -74,10 +74,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.table1.verticalHeader().setVisible(False)
         self.table1.horizontalHeader().setVisible(False)
         self.table1.resizeColumnsToContents()
-        self.table1.resizeRowsToContents()
+        #self.table1.resizeRowsToContents()
         header = self.table1.horizontalHeader()
-        header.setMinimumSectionSize(50)
-        self.table1.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        header.setMinimumSectionSize(100)
+
         #self.table1.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         #self.stackedWidget.resize(800, 1200)
 
@@ -85,7 +85,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.stackedWidget.removeWidget(self.stackedWidget.widget(0))  # 删除页面1
         self.stackedWidget.addWidget(self.table1)
         #self.stackedWidget.setCurrentIndex(2)
-
+        self.table1.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         pg.setConfigOptions(antialias=True)
         self.plot = pg.PlotWidget()
         self.plot_2 = pg.PlotWidget()
@@ -197,96 +197,99 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         #print(xdata,xtime)
         ydata, ytime = sql_select.getdate(now, yi)
         zdata, ztime = sql_select.getdate(now, zi)
-        #平滑处理
-        window_size = 7
-        order = 3
+        if xdata == []:
+            pass
+        else:
+            #平滑处理
+            window_size = 7
+            order = 3
 
-        if len(xdata)>window_size:
-            xdata = savgol_filter(xdata, window_size, order)
-            N = len(xdata)
-            T = 0.2
-            yf = fft(xdata)
-            xf = fftfreq(N, T)[:N // 2]
-            # t_new = np.linspace(xtime[0], xtime[-1], 1000)
-            # x_resampled = np.interp(t_new, xtime, xdata)
-            #
-            # N = len(x_resampled)
-            # T = t_new[1] - t_new[0]
-            # yf = fft(x_resampled)
-            # xf = fftfreq(N, T)[:N // 2]
+            if len(xdata)>window_size:
+                xdata = savgol_filter(xdata, window_size, order)
+                N = len(xdata)
+                T = 0.2
+                yf = fft(xdata)
+                xf = fftfreq(N, T)[:N // 2]
+                # t_new = np.linspace(xtime[0], xtime[-1], 1000)
+                # x_resampled = np.interp(t_new, xtime, xdata)
+                #
+                # N = len(x_resampled)
+                # T = t_new[1] - t_new[0]
+                # yf = fft(x_resampled)
+                # xf = fftfreq(N, T)[:N // 2]
 
-            for item in self.plot_4.items():
+                for item in self.plot_4.items():
+                    if isinstance(item, pg.TextItem):
+                        self.plot_4.removeItem(item)
+                self.plot_4.clearPlots()
+                # 20 * np.log10(2.0 / N * np.abs(yf[:N // 2]))
+                self.plot_4.plot(xf,2.0/N * np.abs(yf[:N//2]) , pen=pg.mkPen(pg.intColor(0), width=2))
+                self.plot_4.autoRange()
+                #self.plot_4.setRange(xRange=[1, np.max(xf)],yRange=[0.01, 10])
+            # else:
+            #     if len(xdata)%2!=0:
+            #         xdata = savgol_filter(xdata, len(xdata), order)
+            #     else:
+            #         xdata = savgol_filter(xdata, len(xdata)-1, order)
+
+            if len(ydata)>window_size:
+                ydata = savgol_filter(ydata, window_size, order)
+                N = len(ydata)
+                T = 0.2
+                yf = fft(ydata)
+                xf = fftfreq(N, T)[:N // 2]
+
+                for item in self.plot_5.items():
+                    if isinstance(item, pg.TextItem):
+                        self.plot_5.removeItem(item)
+                self.plot_5.clearPlots()
+
+                self.plot_5.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
+                self.plot_5.autoRange()
+
+            if len(zdata)>window_size:
+                zdata = savgol_filter(zdata, window_size, order)
+                N = len(zdata)
+                T = 0.2
+                yf = fft(zdata)
+                xf = fftfreq(N, T)[:N // 2]
+
+                for item in self.plot_6.items():
+                    if isinstance(item, pg.TextItem):
+                        self.plot_6.removeItem(item)
+                self.plot_6.clearPlots()
+
+                self.plot_6.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
+                self.plot_6.autoRange()
+            # xdata=np.array(xdata)
+            # xtime=np.array(xtime)
+            for item in self.plot.items():
                 if isinstance(item, pg.TextItem):
-                    self.plot_4.removeItem(item)
-            self.plot_4.clearPlots()
-            # 20 * np.log10(2.0 / N * np.abs(yf[:N // 2]))
-            self.plot_4.plot(xf,2.0/N * np.abs(yf[:N//2]) , pen=pg.mkPen(pg.intColor(0), width=2))
-            self.plot_4.autoRange()
-            #self.plot_4.setRange(xRange=[1, np.max(xf)],yRange=[0.01, 10])
-        # else:
-        #     if len(xdata)%2!=0:
-        #         xdata = savgol_filter(xdata, len(xdata), order)
-        #     else:
-        #         xdata = savgol_filter(xdata, len(xdata)-1, order)
+                    self.plot.removeItem(item)
+            self.plot.clearPlots()
 
-        if len(ydata)>window_size:
-            ydata = savgol_filter(ydata, window_size, order)
-            N = len(ydata)
-            T = 0.2
-            yf = fft(ydata)
-            xf = fftfreq(N, T)[:N // 2]
-
-            for item in self.plot_5.items():
+            for item in self.plot_2.items():
                 if isinstance(item, pg.TextItem):
-                    self.plot_5.removeItem(item)
-            self.plot_5.clearPlots()
+                    self.plot_2.removeItem(item)
+            self.plot_2.clearPlots()
 
-            self.plot_5.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
-            self.plot_5.autoRange()
-
-        if len(zdata)>window_size:
-            zdata = savgol_filter(zdata, window_size, order)
-            N = len(zdata)
-            T = 0.2
-            yf = fft(zdata)
-            xf = fftfreq(N, T)[:N // 2]
-
-            for item in self.plot_6.items():
+            for item in self.plot_3.items():
                 if isinstance(item, pg.TextItem):
-                    self.plot_6.removeItem(item)
-            self.plot_6.clearPlots()
+                    self.plot_3.removeItem(item)
+            self.plot_3.clearPlots()
 
-            self.plot_6.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
-            self.plot_6.autoRange()
-        # xdata=np.array(xdata)
-        # xtime=np.array(xtime)
-        for item in self.plot.items():
-            if isinstance(item, pg.TextItem):
-                self.plot.removeItem(item)
-        self.plot.clearPlots()
-
-        for item in self.plot_2.items():
-            if isinstance(item, pg.TextItem):
-                self.plot_2.removeItem(item)
-        self.plot_2.clearPlots()
-
-        for item in self.plot_3.items():
-            if isinstance(item, pg.TextItem):
-                self.plot_3.removeItem(item)
-        self.plot_3.clearPlots()
-
-        self.plot.plot(xtime,xdata, pen=pg.mkPen(pg.intColor(0), width=2),
-                       symbol='o', symbolSize=2)
-        self.plot.autoRange()
-        self.plot.setRange(xRange=[0, 30000])
-        self.plot_2.plot(ytime, ydata, pen=pg.mkPen(pg.intColor(0), width=2),
-                       symbol='o', symbolSize=2)
-        self.plot_2.autoRange()
-        self.plot_2.setRange(xRange=[0, 30000])
-        self.plot_3.plot(ztime, zdata, pen=pg.mkPen(pg.intColor(0), width=2),
-                       symbol='o', symbolSize=2)
-        self.plot_3.autoRange()
-        self.plot_3.setRange(xRange=[0, 30000])
+            self.plot.plot(xtime,xdata, pen=pg.mkPen(pg.intColor(0), width=2),
+                           symbol='o', symbolSize=2)
+            self.plot.autoRange()
+            self.plot.setRange(xRange=[0, 30000])
+            self.plot_2.plot(ytime, ydata, pen=pg.mkPen(pg.intColor(0), width=2),
+                           symbol='o', symbolSize=2)
+            self.plot_2.autoRange()
+            self.plot_2.setRange(xRange=[0, 30000])
+            self.plot_3.plot(ztime, zdata, pen=pg.mkPen(pg.intColor(0), width=2),
+                           symbol='o', symbolSize=2)
+            self.plot_3.autoRange()
+            self.plot_3.setRange(xRange=[0, 30000])
 
     def showFileDialog(self):
         # 打开文件选择对话框
