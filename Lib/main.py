@@ -22,14 +22,17 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.retranslateUi(self)
         self.shared_data = shared_data
+        self.showMaximized()
         self.init()
+        self.stackedWidget.setMaximumHeight(900)
+        # self.showMaximized()
         # self.comboBox.currentIndexChanged.connect(self.updateplot)
         # self.comboBox_2.currentIndexChanged.connect(self.updateplot_2)
         # self.comboBox_3.currentIndexChanged.connect(self.updateplot_3)
 
         self.tabWidget.currentChanged.connect(self.tabChanged)
         self.comboBox.activated.connect(self.stackedWidget.setCurrentIndex)
-        self.showMaximized()
+        #self.showMaximized()
         # 定时器，定时更新数据
         self.timer = QTimer()
         self.timer.setInterval(100)
@@ -70,11 +73,12 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                     row = 0
                     col += 2
         self.tableWidget.verticalHeader().setVisible(False)
-        self.tableWidget.horizontalHeader().setVisible(False)
-        self.tableWidget.resizeColumnsToContents()
-        self.tableWidget.resizeRowsToContents()
-        header = self.tableWidget.horizontalHeader()
-        header.setMinimumSectionSize(100)
+        self.tableWidget.horizontalHeader().setVisible(False)#行列序号取消
+        self.tableWidget.resizeColumnsToContents()#根据内容调整列宽
+        #self.tableWidget.resizeRowsToContents()#根据内容调整行高
+        self.tableWidget.setFixedHeight(150)
+        #self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget.horizontalHeader().setMinimumSectionSize(100)
 
         #self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         #self.stackedWidget.resize(800, 1200)
@@ -158,38 +162,42 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
     def updateData(self):
         # if len(self.shared_data['shard'])>=20:
-        if type(self.shared_data['shard'])==list:
-            # self.label_7.setText(str(self.shared_data['shard'][0]))
-            # self.label_8.setText(str(self.shared_data['shard'][1]))
-            # self.label_9.setText(str(self.shared_data['shard'][2]))
-            # self.label_10.setText(str(self.shared_data['shard'][4]))
-            # self.label_11.setText(str(self.shared_data['shard'][5]))
-            # self.label_18.setText(str(self.shared_data['shard'][6]))
-            # self.label_12.setText(str(self.shared_data['shard'][19]))
-            # self.label_19.setText(str(self.shared_data['shard'][20]))
-            # self.label_20.setText(str(self.shared_data['shard'][21]))
-            row = 0
-            col = 1
-            for i in range(22):
-                if i==3:
-                    pass
-                else:
-                    print(1)
-                    item = QtWidgets.QTableWidgetItem(str(self.shared_data['shard'][i]))
-                    self.tableWidget.setItem(row, col, item)
-                    print(row, col, item)
-                    if col == 5 or col == 7 or col == 9:
-                        if row < 3:
-                            row += 1
-                        else:
-                            row = 0
-                            col += 2
+        if self.stackedWidget.currentIndex()==0:
+            if type(self.shared_data['shard'])==list:
+                # self.label_7.setText(str(self.shared_data['shard'][0]))
+                # self.label_8.setText(str(self.shared_data['shard'][1]))
+                # self.label_9.setText(str(self.shared_data['shard'][2]))
+                # self.label_10.setText(str(self.shared_data['shard'][4]))
+                # self.label_11.setText(str(self.shared_data['shard'][5]))
+                # self.label_18.setText(str(self.shared_data['shard'][6]))
+                # self.label_12.setText(str(self.shared_data['shard'][19]))
+                # self.label_19.setText(str(self.shared_data['shard'][20]))
+                # self.label_20.setText(str(self.shared_data['shard'][21]))
+                row = 0
+                col = 1
+                for i in range(22):
+                    if i==3:
+                        pass
                     else:
-                        if row < 2:
-                            row += 1
+                        print(1)
+                        item = QtWidgets.QTableWidgetItem(str(self.shared_data['shard'][i]))
+                        self.tableWidget.setItem(row, col, item)
+                        print(row, col, item)
+                        if col == 5 or col == 7 or col == 9:
+                            if row < 3:
+                                row += 1
+                            else:
+                                row = 0
+                                col += 2
                         else:
-                            row = 0
-                            col += 2
+                            if row < 2:
+                                row += 1
+                            else:
+                                row = 0
+                                col += 2
+
+        elif self.stackedWidget.currentIndex() == 1:
+            pass
 
     def update_plotdata(self):
         xtext = self.comboBox_2.currentText()
@@ -359,9 +367,11 @@ def show(shared_data):
 
 def getdata(shared_data):
     while True:
-        data = RS485.communcation(1)
+        data = RS485.communcation(1,0000,22)
         shared_data['shard'] = data
         time.sleep(0.2)
+
+
 
 if __name__ == '__main__':
     manager = Manager()

@@ -111,10 +111,22 @@ def insert_data_to_db(time: str, ls):
     cursor.close()
     conn.close()
 
-def communcation(add):
+# def insert_data_to_db(time: str, ls):
+#     # 将数据直接写进数据库
+#     try:
+#         with pymysql.connect(host='127.0.0.1', user='root', password='password', database='triaxial') as conn:
+#             with conn.cursor() as cursor:
+#                 cursor.execute("INSERT INTO data_table (time, x轴振动速度, y轴振动速度, z轴振动速度, x轴振动加速度, y轴振动加速度, z轴振动加速度, x轴位移, y轴位移, z轴位移) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+#                                (time,ls[0],str(ls[1]),str(ls[2]),str(ls[4]),str(ls[5]),str(ls[6]),str(ls[19]),str(ls[20]),str(ls[21])))
+#                 conn.commit()
+#     except pymysql.Error:
+#         return
+
+
+def communcation(add,startreg,regnums):
     slaveadd = add
-    startreg = 0000
-    regnums = 22
+    startreg = startreg #0000
+    regnums = regnums #22
     send_data = mmodbus03or04(slaveadd, startreg, regnums)
     #print("send data : ", send_data.hex())
     try:
