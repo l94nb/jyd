@@ -3,12 +3,14 @@ import crcmod
 import datetime
 import pymysql
 
+
 # CRC16校验，返回整型数
 def crc16(veritydata):
     if not veritydata:
         return
     crc16 = crcmod.mkCrcFun(0x18005, rev=True, initCrc=0xFFFF, xorOut=0x0000)
     return crc16(veritydata)
+
 
 # 校验数据帧的CRC码是否正确
 def checkcrc(data):
@@ -27,6 +29,7 @@ def checkcrc(data):
         return False
     return True
 
+
 # Modbus-RTU协议的03或04读取保存或输入寄存器功能主-》从命令帧
 def mmodbus03or04(add, startregadd, regnum, funcode=3):
     # add：Modbus从站地址（仪表地址）
@@ -39,14 +42,17 @@ def mmodbus03or04(add, startregadd, regnum, funcode=3):
     if funcode != 3 and funcode != 4:
         print("Error: parameter error")
         return
-    sendbytes = add.to_bytes(1, byteorder="big", signed=False)#转进制，大端符合传输，小段符合计算机存储
-    sendbytes = sendbytes + funcode.to_bytes(1, byteorder="big", signed=False) + startregadd.to_bytes(2, byteorder="big", signed=False) + \
+    sendbytes = add.to_bytes(1, byteorder="big", signed=False)  # 转进制，大端符合传输，小段符合计算机存储
+    sendbytes = sendbytes + funcode.to_bytes(1, byteorder="big", signed=False) + startregadd.to_bytes(2,
+                                                                                                      byteorder="big",
+                                                                                                      signed=False) + \
                 regnum.to_bytes(2, byteorder="big", signed=False)
     crcres = crc16(sendbytes)
     crc16bytes = crcres.to_bytes(2, byteorder="little", signed=False)
     sendbytes = sendbytes + crc16bytes
-    #print(sendbytes)
+    # print(sendbytes)
     return sendbytes
+
 
 # Modbus-RTU协议的03或04读取保持或输入寄存器功能从-》主的数据帧解析（浮点数2,1,4,3格式，16位短整形（定义正负数））
 def smodbus03or04(recvdata, valueformat=0, intsigned=False):
@@ -63,7 +69,7 @@ def smodbus03or04(recvdata, valueformat=0, intsigned=False):
         print("Error: crc error")
         return
     datalist = list(recvdata)
-    #print(datalist)
+    # print(datalist)
     if datalist[1] != 0x3 and datalist[1] != 0x4:
         print("Error: recv data funcode error")
         return
@@ -71,7 +77,6 @@ def smodbus03or04(recvdata, valueformat=0, intsigned=False):
     if bytenums % 2 != 0:
         print("Error: recv data reg data error")
         return
-
 
     # 01 03 14 /00 00 00 42/ 00 00 00 00/ 00 00 00 00/ 07 31/ 00 00 69 78/ 08 42/ 48 82
     # 通信地址01
@@ -86,16 +91,25 @@ def smodbus03or04(recvdata, valueformat=0, intsigned=False):
     # 校验
 
     if valueformat == 0:
-        ls=[]
-        for i in range(3,47,2):
-            num = recvdata[i:i+2]
+        ls = []
+        for i in range(3, 47, 2):
+            num = recvdata[i:i + 2]
             num = int.from_bytes(num, byteorder="big", signed=False)
             num = num / 100
             ls.append(num)
         # print(ls)
         return ls
     elif valueformat == 1:
-        pass
+        ls = []
+        for i in range(3, 243, 2):
+            num = recvdata[i:i + 2]
+            num = int.from_bytes(num, byteorder="big", signed=False)
+            num = num / 100
+            ls.append(num)
+        for i in [0, 19, 38, 40, 59, 78, 80, 99, 118]:
+            ls[i] = int(ls[i] * 100)
+        return ls
+
 
 def insert_data_to_db(time: str, ls):
     # 连接数据库
@@ -105,11 +119,14 @@ def insert_data_to_db(time: str, ls):
     except pymysql.Error:
         return
     # 将数据直接写进数据库
-    cursor.execute("INSERT INTO data_table (time, x轴振动速度, y轴振动速度, z轴振动速度, x轴振动加速度, y轴振动加速度, z轴振动加速度, x轴位移, y轴位移, z轴位移) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                   (time,ls[0],str(ls[1]),str(ls[2]),str(ls[4]),str(ls[5]),str(ls[6]),str(ls[19]),str(ls[20]),str(ls[21])))
+    cursor.execute(
+        "INSERT INTO data_table (time, x轴振动速度, y轴振动速度, z轴振动速度, x轴振动加速度, y轴振动加速度, z轴振动加速度, x轴位移, y轴位移, z轴位移) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        (
+        time, ls[0], str(ls[1]), str(ls[2]), str(ls[4]), str(ls[5]), str(ls[6]), str(ls[19]), str(ls[20]), str(ls[21])))
     conn.commit(),
     cursor.close()
     conn.close()
+
 
 # def insert_data_to_db(time: str, ls):
 #     # 将数据直接写进数据库
@@ -123,22 +140,22 @@ def insert_data_to_db(time: str, ls):
 #         return
 
 
-def communcation(add,startreg,regnums):
+def communcation(add, startreg, regnums):
     slaveadd = add
-    startreg = startreg #0000
-    regnums = regnums #22
+    startreg = startreg  # 0000
+    regnums = regnums  # 22
     send_data = mmodbus03or04(slaveadd, startreg, regnums)
-    #print("send data : ", send_data.hex())
+    # print("send data : ", send_data.hex())
     try:
         com = serial.Serial("com4", 9600, timeout=0.1)
     except:
         return '未连接', '未连接'
     else:
-        #starttime = time.time()
+        # starttime = time.time()
         com.write(send_data)
-        #print(send_data)
-        recv_data = com.read(regnums*2+5)
-        #print(recv_data)
+        # print(send_data)
+        recv_data = com.read(regnums * 2 + 5)
+        # print(recv_data)
         other_StyleTime = datetime.datetime.now()
         other_StyleTime = other_StyleTime.strftime('%Y-%m-%d %H:%M:%S.%f')
 
@@ -146,13 +163,16 @@ def communcation(add,startreg,regnums):
         #     print("recv: ", recv_data.hex())
         # print(f"used time: {endtime-starttime:.3f}")
         com.close()
-        data=smodbus03or04(recv_data)
-        if data==None:
-            return '连接失败'
+        if regnums > 30:
+            data = smodbus03or04(recv_data, 1)
         else:
-            insert_data_to_db(other_StyleTime,data)
-            #print(data)
-            return data
-#位移峰峰值x,y,z 19,20,21
-#速度有效值、峰值、峭度系数
-# print(communcation(1))
+            data = smodbus03or04(recv_data)
+            if data == None:
+                return '连接失败'
+            else:
+                insert_data_to_db(other_StyleTime, data)
+            # print(data)
+        return data
+# 位移峰峰值x,y,z 19,20,21
+# 速度有效值、峰值、峭度系数
+# print(communcation(1, 23, 120))

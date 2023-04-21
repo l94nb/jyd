@@ -15,6 +15,7 @@ import scipy.io as sio
 from scipy.fft import fft, fftfreq
 import numpy as np
 
+
 class DemoMain(QMainWindow, Ui_MainWindow):
     def __init__(self, shared_data):
         # 初始化父类
@@ -31,8 +32,8 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         # self.comboBox_3.currentIndexChanged.connect(self.updateplot_3)
 
         self.tabWidget.currentChanged.connect(self.tabChanged)
-        self.comboBox.activated.connect(self.stackedWidget.setCurrentIndex)
-        #self.showMaximized()
+        self.comboBox.activated.connect(self.stackedChanged)
+        # self.showMaximized()
         # 定时器，定时更新数据
         self.timer = QTimer()
         self.timer.setInterval(100)
@@ -43,18 +44,49 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.timer1.setInterval(200)
         self.timer1.timeout.connect(self.update_plotdata)
 
-
+        self.timer.start()  # 1000=1s
+        self.timer1.start()
 
     def init(self):
-        ls=['x轴振动速度RMS平均值', 'y轴振动速度RMS平均值', 'z轴振动速度RMS平均值', 'x轴振动加速度RMS平均值', 'y轴振动加速度RMS平均值', 'z轴振动加速度RMS平均值', 'x轴振动速度最大值–峰值', 'x轴振动速度峭度平均值', 'x轴振动加速度最大值-峰值', 'x轴振动加速度峭度平均值', 'y轴振动速度最大值–峰值', 'y轴振动速度峭度平均值', 'y轴振动加速度最大值-峰值', 'y轴振动加速度峭度平均值', 'z轴振动速度最大值–峰值', 'z轴振动速度峭度平均值', 'z轴振动加速度最大值-峰值', 'z轴振动加速度峭度平均值', 'x轴振动位移峰峰值', 'y轴振动位移峰峰值', 'z轴振动位移峰峰值',]
+        ls = ['x轴振动速度RMS平均值', 'y轴振动速度RMS平均值', 'z轴振动速度RMS平均值', 'x轴振动加速度RMS平均值', 'y轴振动加速度RMS平均值', 'z轴振动加速度RMS平均值',
+              'x轴振动速度最大值–峰值', 'x轴振动速度峭度平均值', 'x轴振动加速度最大值-峰值', 'x轴振动加速度峭度平均值', 'y轴振动速度最大值–峰值', 'y轴振动速度峭度平均值',
+              'y轴振动加速度最大值-峰值', 'y轴振动加速度峭度平均值', 'z轴振动速度最大值–峰值', 'z轴振动速度峭度平均值', 'z轴振动加速度最大值-峰值', 'z轴振动加速度峭度平均值',
+              'x轴振动位移峰峰值', 'y轴振动位移峰峰值', 'z轴振动位移峰峰值', ]
+
+        # 22,[23,62][63,102,][103,142]'频谱分析周期计数',
+        ls_2 = ['振动通道 ID', '该测点转速', '内圈特征值 1X', '外圈特征值 1X', '滚动体特征 1X', '保持架特征值 1X', '关注点1加速度谱能量',
+                '关注点2加速度谱能量',
+                '关注点3加速度谱能量', '关注点4加速度谱能量', '关注点5加速度谱能量', '关注点6加速度谱能量', '关注点7加速度谱能量', '关注点8加速度谱能量', '关注带1加速度谱能量',
+                '关注带2加速度谱能量',
+                '关注带3加速度谱能量', '关注带4加速度谱能量', '关注带5加速度谱能量', '加速度谱最高能量点的阶次', '加速度谱总能量', '叶片特征值 1X', '叶片特征值 2X', '叶片特征值 3X',
+                '叶片特征值 4X', '关注点1速度谱能量', '关注点2速度谱能量', '关注点3速度谱能量', '关注点4速度谱能量', '关注点5速度谱能量', '关注点6速度谱能量', '关注点7速度谱能量',
+                '关注点8速度谱能量', '关注带1速度谱能量', '关注带2速度谱能量', '关注带3速度谱能量', '关注带4速度谱能量', '关注带5速度谱能量', '速度谱最高能量点的阶次', '速度谱总能量',
+                '振动通道 ID',
+                '该测点转速', '内圈特征值 1X', '外圈特征值 1X', '滚动体特征 1X', '保持架特征值 1X', '关注点1加速度谱能量', '关注点2加速度谱能量', '关注点3加速度谱能量',
+                '关注点4加速度谱能量',
+                '关注点5加速度谱能量', '关注点6加速度谱能量', '关注点7加速度谱能量', '关注点8加速度谱能量', '关注带1加速度谱能量', '关注带2加速度谱能量', '关注带3加速度谱能量',
+                '关注带4加速度谱能量',
+                '关注带5加速度谱能量', '加速度谱最高能量点的阶次', '加速度谱总能量', '叶片特征值 1X', '叶片特征值 2X', '叶片特征值 3X', '叶片特征值 4X', '关注点1速度谱能量',
+                '关注点2速度谱能量',
+                '关注点3速度谱能量', '关注点4速度谱能量', '关注点5速度谱能量', '关注点6速度谱能量', '关注点7速度谱能量', '关注点8速度谱能量', '关注带1速度谱能量', '关注带2速度谱能量',
+                '关注带3速度谱能量', '关注带4速度谱能量', '关注带5速度谱能量', '速度谱最高能量点的阶次', '速度谱总能量', '振动通道 ID', '该测点转速', '内圈特征值 1X',
+                '外圈特征值 1X',
+                '滚动体特征 1X', '保持架特征值 1X', '关注点1加速度谱能量', '关注点2加速度谱能量', '关注点3加速度谱能量', '关注点4加速度谱能量', '关注点5加速度谱能量',
+                '关注点6加速度谱能量',
+                '关注点7加速度谱能量', '关注点8加速度谱能量', '关注带1加速度谱能量', '关注带2加速度谱能量', '关注带3加速度谱能量', '关注带4加速度谱能量', '关注带5加速度谱能量',
+                '加速度谱最高能量点的阶次',
+                '加速度谱总能量', '叶片特征值 1X', '叶片特征值 2X', '叶片特征值 3X', '叶片特征值 4X', '关注点1速度谱能量', '关注点2速度谱能量', '关注点3速度谱能量',
+                '关注点4速度谱能量',
+                '关注点5速度谱能量', '关注点6速度谱能量', '关注点7速度谱能量', '关注点8速度谱能量', '关注带1速度谱能量', '关注带2速度谱能量', '关注带3速度谱能量', '关注带4速度谱能量',
+                '关注带5速度谱能量', '速度谱最高能量点的阶次', '速度谱总能量']
 
         self.comboBox.addItem('振动温度一体传感器时域数据2208')
         self.comboBox.addItem('振动温度一体传感器谱分析数据2208')
-        #self.comboBox.addItem('振动温度一体传感器参数设置2210')
+        # self.comboBox.addItem('振动温度一体传感器参数设置2210')
 
         self.tableWidget.setRowCount(4)
         self.tableWidget.setColumnCount(12)
-        #self.tableWidget.setHorizontalHeaderLabels(['名称1', '数值1'])
+        # self.tableWidget.setHorizontalHeaderLabels(['名称1', '数值1'])
         row = 0
         col = 0
         for i in range(len(ls)):
@@ -72,23 +104,44 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                 else:
                     row = 0
                     col += 2
+
         self.tableWidget.verticalHeader().setVisible(False)
-        self.tableWidget.horizontalHeader().setVisible(False)#行列序号取消
-        self.tableWidget.resizeColumnsToContents()#根据内容调整列宽
-        #self.tableWidget.resizeRowsToContents()#根据内容调整行高
+        self.tableWidget.horizontalHeader().setVisible(False)  # 行列序号取消
+        self.tableWidget.resizeColumnsToContents()  # 根据内容调整列宽
+        # self.tableWidget.resizeRowsToContents()#根据内容调整行高
         self.tableWidget.setFixedHeight(150)
-        #self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        # self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.tableWidget.horizontalHeader().setMinimumSectionSize(100)
 
-        #self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        #self.stackedWidget.resize(800, 1200)
+        # self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        # self.stackedWidget.resize(800, 1200)
 
         # self.stackedWidget.removeWidget(self.stackedWidget.widget(0))  # 删除页面0
         # self.stackedWidget.removeWidget(self.stackedWidget.widget(0))  # 删除页面1
         # self.stackedWidget.addWidget(self.tableWidget)
-        #self.stackedWidget.setCurrentIndex(2)
-        #self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        # self.stackedWidget.setCurrentIndex(2)
+        # self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
+        self.tableWidget_2.setRowCount(20)
+        self.tableWidget_2.setColumnCount(12)
+        # self.tableWidget.setHorizontalHeaderLabels(['名称1', '数值1'])
+        row = 0
+        col = 0
+        for i in range(len(ls_2)):
+            item = QtWidgets.QTableWidgetItem(ls_2[i])
+            self.tableWidget_2.setItem(row, col, item)
+            if row < 19:
+                row += 1
+            else:
+                row = 0
+                col += 2
+        self.tableWidget_2.verticalHeader().setVisible(False)
+        self.tableWidget_2.horizontalHeader().setVisible(False)  # 行列序号取消
+        self.tableWidget_2.resizeColumnsToContents()  # 根据内容调整列宽
+        # self.tableWidget.resizeRowsToContents()#根据内容调整行高
+        self.tableWidget_2.setFixedHeight(1300)
+        # self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget_2.horizontalHeader().setMinimumSectionSize(100)
 
         pg.setConfigOptions(antialias=True)
         self.plot = pg.PlotWidget()
@@ -131,13 +184,11 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         # 设置时间轴单位为毫秒
         self.plot_3.setLabel('bottom', 'Time', units='ms')
 
-
-        #self.label_7.setStyleSheet("QLabel { background-color: #FFC0CB; color: black; text-shadow: 1px 1px #000000; }")
-
+        # self.label_7.setStyleSheet("QLabel { background-color: #FFC0CB; color: black; text-shadow: 1px 1px #000000; }")
 
         # self.label.setStyleSheet(
         #     "QLabel {background-color: #696969; color: #333333; border: 1px solid #A9A9A9; padding: 5px;}")
-        #background-color 表示背景颜色，color 表示字体颜色，border 表示边框样式和颜色，padding 表示文本与边框的距离
+        # background-color 表示背景颜色，color 表示字体颜色，border 表示边框样式和颜色，padding 表示文本与边框的距离
         self.comboBox_2.addItem('x轴振动速度')
         self.comboBox_2.addItem('x轴振动加速度')
         self.comboBox_2.addItem('x轴位移')
@@ -151,38 +202,41 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.pushButton.setText('Select File')
         self.pushButton.clicked.connect(self.showFileDialog)
 
-    def tabChanged(self,index):
+    def stackedChanged(self, index):
         if index == 0:
-            self.timer.start()  # 1000=1s
+            self.timer1.start()
+            self.stackedWidget.setCurrentIndex(0)
+            temp = self.shared_data['flag']
+            temp[0] = 0
+            self.shared_data['flag'] = temp
+        elif index == 1:
+            self.timer1.stop()
+            self.stackedWidget.setCurrentIndex(1)
+            temp = self.shared_data['flag']
+            temp[0] = 1
+            self.shared_data['flag'] = temp
+
+    def tabChanged(self, index):
+        if index == 0:
             self.timer1.start()
 
-        if index == 1:
-            self.timer.stop()
+        elif index == 1:
             self.timer1.stop()
+
 
     def updateData(self):
         # if len(self.shared_data['shard'])>=20:
-        if self.stackedWidget.currentIndex()==0:
-            if type(self.shared_data['shard'])==list:
-                # self.label_7.setText(str(self.shared_data['shard'][0]))
-                # self.label_8.setText(str(self.shared_data['shard'][1]))
-                # self.label_9.setText(str(self.shared_data['shard'][2]))
-                # self.label_10.setText(str(self.shared_data['shard'][4]))
-                # self.label_11.setText(str(self.shared_data['shard'][5]))
-                # self.label_18.setText(str(self.shared_data['shard'][6]))
-                # self.label_12.setText(str(self.shared_data['shard'][19]))
-                # self.label_19.setText(str(self.shared_data['shard'][20]))
-                # self.label_20.setText(str(self.shared_data['shard'][21]))
+        if self.stackedWidget.currentIndex() == 0:
+            if type(self.shared_data['shard']) == list:
                 row = 0
                 col = 1
                 for i in range(22):
-                    if i==3:
+                    if i == 3:
                         pass
                     else:
-                        print(1)
                         item = QtWidgets.QTableWidgetItem(str(self.shared_data['shard'][i]))
                         self.tableWidget.setItem(row, col, item)
-                        print(row, col, item)
+                        #print(row, col, item)
                         if col == 5 or col == 7 or col == 9:
                             if row < 3:
                                 row += 1
@@ -197,44 +251,55 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                                 col += 2
 
         elif self.stackedWidget.currentIndex() == 1:
-            pass
+            #print(1)
+            if type(self.shared_data['shard']) == list:
+                row = 0
+                col = 1
+                for i in range(len(self.shared_data['shard'])):
+                    item = QtWidgets.QTableWidgetItem(str(self.shared_data['shard'][i]))
+                    self.tableWidget_2.setItem(row, col, item)
+                    #print(row, col, item)
+                    if row < 19:
+                        row += 1
+                    else:
+                        row = 0
+                        col += 2
 
     def update_plotdata(self):
         xtext = self.comboBox_2.currentText()
         ytext = self.comboBox_3.currentText()
         ztext = self.comboBox_4.currentText()
         if xtext == 'x轴振动速度':
-            xi=2
+            xi = 2
         if xtext == 'x轴振动加速度':
-            xi=5
+            xi = 5
         if xtext == 'x轴位移':
-            xi=8
+            xi = 8
         if ytext == 'y轴振动速度':
-            yi=3
+            yi = 3
         if ytext == 'y轴振动加速度':
-            yi=6
+            yi = 6
         if ytext == 'y轴位移':
-            yi=9
+            yi = 9
         if ztext == 'z轴振动速度':
-            zi=4
+            zi = 4
         if ztext == 'z轴振动加速度':
-            zi=7
+            zi = 7
         if ztext == 'z轴位移':
-            zi=10
+            zi = 10
 
         now = datetime.datetime.now()
         xdata, xtime = sql_select.getdate(now, xi)
-        #print(xdata,xtime)
         ydata, ytime = sql_select.getdate(now, yi)
         zdata, ztime = sql_select.getdate(now, zi)
         if xdata == []:
             pass
         else:
-            #平滑处理
+            # 平滑处理
             window_size = 7
             order = 3
 
-            if len(xdata)>window_size:
+            if len(xdata) > window_size:
                 xdata = savgol_filter(xdata, window_size, order)
                 N = len(xdata)
                 T = 0.2
@@ -253,16 +318,16 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                         self.plot_4.removeItem(item)
                 self.plot_4.clearPlots()
                 # 20 * np.log10(2.0 / N * np.abs(yf[:N // 2]))
-                self.plot_4.plot(xf,2.0/N * np.abs(yf[:N//2]) , pen=pg.mkPen(pg.intColor(0), width=2))
+                self.plot_4.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
                 self.plot_4.autoRange()
-                #self.plot_4.setRange(xRange=[1, np.max(xf)],yRange=[0.01, 10])
+                # self.plot_4.setRange(xRange=[1, np.max(xf)],yRange=[0.01, 10])
             # else:
             #     if len(xdata)%2!=0:
             #         xdata = savgol_filter(xdata, len(xdata), order)
             #     else:
             #         xdata = savgol_filter(xdata, len(xdata)-1, order)
 
-            if len(ydata)>window_size:
+            if len(ydata) > window_size:
                 ydata = savgol_filter(ydata, window_size, order)
                 N = len(ydata)
                 T = 0.2
@@ -277,7 +342,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                 self.plot_5.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
                 self.plot_5.autoRange()
 
-            if len(zdata)>window_size:
+            if len(zdata) > window_size:
                 zdata = savgol_filter(zdata, window_size, order)
                 N = len(zdata)
                 T = 0.2
@@ -308,16 +373,16 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                     self.plot_3.removeItem(item)
             self.plot_3.clearPlots()
 
-            self.plot.plot(xtime,xdata, pen=pg.mkPen(pg.intColor(0), width=2),
+            self.plot.plot(xtime, xdata, pen=pg.mkPen(pg.intColor(0), width=2),
                            symbol='o', symbolSize=2)
             self.plot.autoRange()
             self.plot.setRange(xRange=[0, 30000])
             self.plot_2.plot(ytime, ydata, pen=pg.mkPen(pg.intColor(0), width=2),
-                           symbol='o', symbolSize=2)
+                             symbol='o', symbolSize=2)
             self.plot_2.autoRange()
             self.plot_2.setRange(xRange=[0, 30000])
             self.plot_3.plot(ztime, zdata, pen=pg.mkPen(pg.intColor(0), width=2),
-                           symbol='o', symbolSize=2)
+                             symbol='o', symbolSize=2)
             self.plot_3.autoRange()
             self.plot_3.setRange(xRange=[0, 30000])
 
@@ -348,15 +413,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         for item in self.plot_8.items():
             if isinstance(item, pg.TextItem):
                 self.plot_8.removeItem(item)
-        self.plot_8.plot(freq[:int(len(freq)/2)], np.abs(fft_data)[:int(len(fft_data)/2)], pen=pg.mkPen(pg.intColor(0), width=2))
+        self.plot_8.plot(freq[:int(len(freq) / 2)], np.abs(fft_data)[:int(len(fft_data) / 2)],
+                         pen=pg.mkPen(pg.intColor(0), width=2))
         self.plot_8.autoRange()
 
-    # def updateplot(self):
-    #     print(1)
-    # def updateplot_2(self):
-    #     print(2)
-    # def updateplot_3(self):
-    #     print(3)
 
 def show(shared_data):
     app = QApplication(sys.argv)
@@ -365,18 +425,25 @@ def show(shared_data):
     demo.show()
     sys.exit(app.exec_())
 
+
 def getdata(shared_data):
     while True:
-        data = RS485.communcation(1,0000,22)
-        shared_data['shard'] = data
-        time.sleep(0.2)
+        if shared_data['flag'][0] == 0:
+            data = RS485.communcation(1, 0, 22)
+            shared_data['shard'] = data
+            time.sleep(0.2)
 
+        elif shared_data['flag'][0] == 1:
+            data = RS485.communcation(1, 23, 120)
+            shared_data['shard'] = data
+            time.sleep(0.3)
 
 
 if __name__ == '__main__':
     manager = Manager()
-    ls=[]
-    shared_data = manager.dict({'shard': ls})
+    ls = []
+    ls_2 = [0]
+    shared_data = manager.dict({'shard': ls, 'flag': ls_2})
     p1 = Process(target=show, args=(shared_data,))
     p2 = Process(target=getdata, args=(shared_data,))
     p1.start()

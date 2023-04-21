@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
         self.comboBox.setObjectName("comboBox")
         self.verticalLayout_3.addWidget(self.comboBox)
         self.stackedWidget = QtWidgets.QStackedWidget(self.tab)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.stackedWidget.sizePolicy().hasHeightForWidth())
