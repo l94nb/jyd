@@ -53,6 +53,16 @@ def mmodbus03or04(add, startregadd, regnum, funcode=3):
     # print(sendbytes)
     return sendbytes
 
+def mmodbus06(add, regadd, regval, funcode=6):
+    sendbytes = add.to_bytes(1, byteorder="big", signed=False)  # 转进制，大端符合传输，小段符合计算机存储
+    sendbytes = sendbytes + funcode.to_bytes(1, byteorder="big", signed=False) + regadd.to_bytes(2,
+                                                                                                      byteorder="big",
+                                                                                                      signed=False) + \
+                regval.to_bytes(2, byteorder="big", signed=False)
+    crcres = crc16(sendbytes)
+    crc16bytes = crcres.to_bytes(2, byteorder="little", signed=False)
+    sendbytes = sendbytes + crc16bytes
+    return sendbytes
 
 # Modbus-RTU协议的03或04读取保持或输入寄存器功能从-》主的数据帧解析（浮点数2,1,4,3格式，16位短整形（定义正负数））
 def smodbus03or04(recvdata, valueformat=0, intsigned=False):
@@ -122,7 +132,8 @@ def insert_data_to_db(time: str, ls):
     cursor.execute(
         "INSERT INTO data_table (time, x轴振动速度, y轴振动速度, z轴振动速度, x轴振动加速度, y轴振动加速度, z轴振动加速度, x轴位移, y轴位移, z轴位移) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
         (
-        time, ls[0], str(ls[1]), str(ls[2]), str(ls[4]), str(ls[5]), str(ls[6]), str(ls[19]), str(ls[20]), str(ls[21])))
+            time, ls[0], str(ls[1]), str(ls[2]), str(ls[4]), str(ls[5]), str(ls[6]), str(ls[19]), str(ls[20]),
+            str(ls[21])))
     conn.commit(),
     cursor.close()
     conn.close()

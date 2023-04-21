@@ -23,10 +23,11 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.retranslateUi(self)
         self.shared_data = shared_data
+        self.stackedWidget.setMaximumHeight(900)
         self.showMaximized()
         self.init()
-        self.stackedWidget.setMaximumHeight(900)
-        # self.showMaximized()
+
+        #self.showMaximized()
         # self.comboBox.currentIndexChanged.connect(self.updateplot)
         # self.comboBox_2.currentIndexChanged.connect(self.updateplot_2)
         # self.comboBox_3.currentIndexChanged.connect(self.updateplot_3)
@@ -46,6 +47,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
         self.timer.start()  # 1000=1s
         self.timer1.start()
+
 
     def init(self):
         ls = ['x轴振动速度RMS平均值', 'y轴振动速度RMS平均值', 'z轴振动速度RMS平均值', 'x轴振动加速度RMS平均值', 'y轴振动加速度RMS平均值', 'z轴振动加速度RMS平均值',
@@ -80,9 +82,9 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                 '关注点5速度谱能量', '关注点6速度谱能量', '关注点7速度谱能量', '关注点8速度谱能量', '关注带1速度谱能量', '关注带2速度谱能量', '关注带3速度谱能量', '关注带4速度谱能量',
                 '关注带5速度谱能量', '速度谱最高能量点的阶次', '速度谱总能量']
 
-        self.comboBox.addItem('振动温度一体传感器时域数据2208')
-        self.comboBox.addItem('振动温度一体传感器谱分析数据2208')
-        # self.comboBox.addItem('振动温度一体传感器参数设置2210')
+        self.comboBox.addItem('振动温度一体传感器时域数据')
+        self.comboBox.addItem('振动温度一体传感器谱分析数据')
+        self.comboBox.addItem('振动温度一体传感器分析图')
 
         self.tableWidget.setRowCount(4)
         self.tableWidget.setColumnCount(12)
@@ -161,6 +163,13 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.plot_7 = pg.PlotWidget()
         self.plot_8 = pg.PlotWidget()
 
+        self.plot_9 = pg.PlotWidget()
+        self.plot_10 = pg.PlotWidget()
+        self.plot_11 = pg.PlotWidget()
+        self.plot_12 = pg.PlotWidget()
+        self.plot_13 = pg.PlotWidget()
+        self.plot_14 = pg.PlotWidget()
+
         self.widget_4.setLayout(QtWidgets.QVBoxLayout())
         self.widget_4.layout().addWidget(self.plot_4)
         self.widget_5.setLayout(QtWidgets.QVBoxLayout())
@@ -171,6 +180,19 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.widget_7.layout().addWidget(self.plot_7)
         self.widget_8.setLayout(QtWidgets.QVBoxLayout())
         self.widget_8.layout().addWidget(self.plot_8)
+
+        self.widget_9.setLayout(QtWidgets.QVBoxLayout())
+        self.widget_9.layout().addWidget(self.plot_9)
+        self.widget_10.setLayout(QtWidgets.QVBoxLayout())
+        self.widget_10.layout().addWidget(self.plot_10)
+        self.widget_11.setLayout(QtWidgets.QVBoxLayout())
+        self.widget_11.layout().addWidget(self.plot_11)
+        self.widget_12.setLayout(QtWidgets.QVBoxLayout())
+        self.widget_12.layout().addWidget(self.plot_12)
+        self.widget_13.setLayout(QtWidgets.QVBoxLayout())
+        self.widget_13.layout().addWidget(self.plot_13)
+        self.widget_14.setLayout(QtWidgets.QVBoxLayout())
+        self.widget_14.layout().addWidget(self.plot_14)
 
         # self.plot.plot(self.x, self.y, pen=pg.mkPen('b', width=2))
         # 设置 x 轴范围为 0-3000毫秒，y 轴范围为 0-10
@@ -199,8 +221,12 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.comboBox_4.addItem('z轴振动加速度')
         self.comboBox_4.addItem('z轴位移')
 
+        self.comboBox_5.addItem('三轴时域')
+        self.comboBox_5.addItem('三轴频域')
+
         self.pushButton.setText('Select File')
         self.pushButton.clicked.connect(self.showFileDialog)
+
 
     def stackedChanged(self, index):
         if index == 0:
@@ -215,6 +241,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             temp = self.shared_data['flag']
             temp[0] = 1
             self.shared_data['flag'] = temp
+        elif index == 2:
+            self.timer.stop()
+            self.timer1.stop()
+            self.stackedWidget.setCurrentIndex(2)
 
     def tabChanged(self, index):
         if index == 0:
@@ -405,6 +435,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         data = data.flatten().tolist()
         fft_data = np.fft.fft(data)
         freq = np.fft.fftfreq(len(data), d=1 / 12000)  # 采样频率为12000Hz
+
         for item in self.plot_7.items():
             if isinstance(item, pg.TextItem):
                 self.plot_7.removeItem(item)
