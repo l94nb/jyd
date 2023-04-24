@@ -10,7 +10,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTimer
 import datetime
 import sql_select
-from scipy.signal import savgol_filter
+from scipy import signal
 import scipy.io as sio
 from scipy.fft import fft, fftfreq
 import numpy as np
@@ -44,6 +44,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.timer1 = QTimer()
         self.timer1.setInterval(200)
         self.timer1.timeout.connect(self.update_plotdata)
+
+        self.timer2 = QTimer()
+        self.timer2.setInterval(200)
+        self.timer2.timeout.connect(self.update_plotdata_1024)
 
         self.timer.start()  # 1000=1s
         self.timer1.start()
@@ -141,7 +145,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.tableWidget_2.horizontalHeader().setVisible(False)  # 行列序号取消
         self.tableWidget_2.resizeColumnsToContents()  # 根据内容调整列宽
         # self.tableWidget.resizeRowsToContents()#根据内容调整行高
-        self.tableWidget_2.setFixedHeight(1300)
+        self.tableWidget_2.setFixedHeight(800)
         # self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.tableWidget_2.horizontalHeader().setMinimumSectionSize(100)
 
@@ -156,9 +160,9 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.widget_3.setLayout(QtWidgets.QVBoxLayout())
         self.widget_3.layout().addWidget(self.plot_3)
 
-        self.plot_4 = pg.PlotWidget()
-        self.plot_5 = pg.PlotWidget()
-        self.plot_6 = pg.PlotWidget()
+        # self.plot_4 = pg.PlotWidget()
+        # self.plot_5 = pg.PlotWidget()
+        # self.plot_6 = pg.PlotWidget()
 
         self.plot_7 = pg.PlotWidget()
         self.plot_8 = pg.PlotWidget()
@@ -170,12 +174,12 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.plot_13 = pg.PlotWidget()
         self.plot_14 = pg.PlotWidget()
 
-        self.widget_4.setLayout(QtWidgets.QVBoxLayout())
-        self.widget_4.layout().addWidget(self.plot_4)
-        self.widget_5.setLayout(QtWidgets.QVBoxLayout())
-        self.widget_5.layout().addWidget(self.plot_5)
-        self.widget_6.setLayout(QtWidgets.QVBoxLayout())
-        self.widget_6.layout().addWidget(self.plot_6)
+        # self.widget_4.setLayout(QtWidgets.QVBoxLayout())
+        # self.widget_4.layout().addWidget(self.plot_4)
+        # self.widget_5.setLayout(QtWidgets.QVBoxLayout())
+        # self.widget_5.layout().addWidget(self.plot_5)
+        # self.widget_6.setLayout(QtWidgets.QVBoxLayout())
+        # self.widget_6.layout().addWidget(self.plot_6)
         self.widget_7.setLayout(QtWidgets.QVBoxLayout())
         self.widget_7.layout().addWidget(self.plot_7)
         self.widget_8.setLayout(QtWidgets.QVBoxLayout())
@@ -230,12 +234,14 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
     def stackedChanged(self, index):
         if index == 0:
+            self.timer2.stop()
             self.timer1.start()
             self.stackedWidget.setCurrentIndex(0)
             temp = self.shared_data['flag']
             temp[0] = 0
             self.shared_data['flag'] = temp
         elif index == 1:
+            self.timer2.stop()
             self.timer1.stop()
             self.stackedWidget.setCurrentIndex(1)
             temp = self.shared_data['flag']
@@ -245,6 +251,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             self.timer.stop()
             self.timer1.stop()
             self.stackedWidget.setCurrentIndex(2)
+            temp = self.shared_data['flag']
+            temp[0] = 2
+            self.shared_data['flag'] = temp
+            self.timer2.start()
 
     def tabChanged(self, index):
         if index == 0:
@@ -325,16 +335,16 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         if xdata == []:
             pass
         else:
-            # 平滑处理
-            window_size = 7
-            order = 3
-
-            if len(xdata) > window_size:
-                xdata = savgol_filter(xdata, window_size, order)
-                N = len(xdata)
-                T = 0.2
-                yf = fft(xdata)
-                xf = fftfreq(N, T)[:N // 2]
+            # # 平滑处理
+            # window_size = 7
+            # order = 3
+            #
+            # if len(xdata) > window_size:
+            #     xdata = savgol_filter(xdata, window_size, order)
+            #     N = len(xdata)
+            #     T = 0.2
+            #     yf = fft(xdata)
+            #     xf = fftfreq(N, T)[:N // 2]
                 # t_new = np.linspace(xtime[0], xtime[-1], 1000)
                 # x_resampled = np.interp(t_new, xtime, xdata)
                 #
@@ -343,49 +353,49 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                 # yf = fft(x_resampled)
                 # xf = fftfreq(N, T)[:N // 2]
 
-                for item in self.plot_4.items():
-                    if isinstance(item, pg.TextItem):
-                        self.plot_4.removeItem(item)
-                self.plot_4.clearPlots()
-                # 20 * np.log10(2.0 / N * np.abs(yf[:N // 2]))
-                self.plot_4.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
-                self.plot_4.autoRange()
+                # for item in self.plot_4.items():
+                #     if isinstance(item, pg.TextItem):
+                #         self.plot_4.removeItem(item)
+                # self.plot_4.clearPlots()
+                # # 20 * np.log10(2.0 / N * np.abs(yf[:N // 2]))
+                # self.plot_4.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
+                # self.plot_4.autoRange()
                 # self.plot_4.setRange(xRange=[1, np.max(xf)],yRange=[0.01, 10])
             # else:
             #     if len(xdata)%2!=0:
             #         xdata = savgol_filter(xdata, len(xdata), order)
             #     else:
             #         xdata = savgol_filter(xdata, len(xdata)-1, order)
-
-            if len(ydata) > window_size:
-                ydata = savgol_filter(ydata, window_size, order)
-                N = len(ydata)
-                T = 0.2
-                yf = fft(ydata)
-                xf = fftfreq(N, T)[:N // 2]
-
-                for item in self.plot_5.items():
-                    if isinstance(item, pg.TextItem):
-                        self.plot_5.removeItem(item)
-                self.plot_5.clearPlots()
-
-                self.plot_5.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
-                self.plot_5.autoRange()
-
-            if len(zdata) > window_size:
-                zdata = savgol_filter(zdata, window_size, order)
-                N = len(zdata)
-                T = 0.2
-                yf = fft(zdata)
-                xf = fftfreq(N, T)[:N // 2]
-
-                for item in self.plot_6.items():
-                    if isinstance(item, pg.TextItem):
-                        self.plot_6.removeItem(item)
-                self.plot_6.clearPlots()
-
-                self.plot_6.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
-                self.plot_6.autoRange()
+            #
+            # if len(ydata) > window_size:
+            #     ydata = savgol_filter(ydata, window_size, order)
+            #     N = len(ydata)
+            #     T = 0.2
+            #     yf = fft(ydata)
+            #     xf = fftfreq(N, T)[:N // 2]
+            #
+            #     for item in self.plot_5.items():
+            #         if isinstance(item, pg.TextItem):
+            #             self.plot_5.removeItem(item)
+            #     self.plot_5.clearPlots()
+            #
+            #     self.plot_5.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
+            #     self.plot_5.autoRange()
+            #
+            # if len(zdata) > window_size:
+            #     zdata = savgol_filter(zdata, window_size, order)
+            #     N = len(zdata)
+            #     T = 0.2
+            #     yf = fft(zdata)
+            #     xf = fftfreq(N, T)[:N // 2]
+            #
+            #     for item in self.plot_6.items():
+            #         if isinstance(item, pg.TextItem):
+            #             self.plot_6.removeItem(item)
+            #     self.plot_6.clearPlots()
+            #
+            #     self.plot_6.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
+            #     self.plot_6.autoRange()
             # xdata=np.array(xdata)
             # xtime=np.array(xtime)
             for item in self.plot.items():
@@ -415,6 +425,128 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                              symbol='o', symbolSize=2)
             self.plot_3.autoRange()
             self.plot_3.setRange(xRange=[0, 30000])
+
+    def update_plotdata_1024(self):
+        if len(self.shared_data['shard']) == 3:
+            lst = [i for i in range(1024)]
+            ls_x = self.shared_data['shard'][0]
+            ls_y = self.shared_data['shard'][1]
+            ls_z = self.shared_data['shard'][2]
+
+            # sampling_rate = 6500
+            # # 对数据进行傅里叶变换
+            # fft_result = fft(ls_x)
+            # # 计算频率轴，根据采样率和数据长度
+            # freq_axis_x = np.linspace(0, sampling_rate, len(ls_x))
+            # # 可以用以下方式获取幅值谱
+            # amplitude_spectrum_x = np.abs(fft_result)
+            # # 可以用以下方式获取相位谱
+            # # phase_spectrum = np.angle(fft_result)
+            # fft_result = fft(ls_y)
+            # freq_axis_y = np.linspace(0, sampling_rate, len(ls_y))
+            # amplitude_spectrum_y = np.abs(fft_result)
+            #
+            # fft_result = fft(ls_z)
+            # freq_axis_z = np.linspace(0, sampling_rate, len(ls_z))
+            # amplitude_spectrum_z = np.abs(fft_result)
+
+            fs = 6500
+            t = np.arange(1024) / fs
+            x = np.sin(2 * np.pi * 1000 * t) + 0.5 * np.sin(2 * np.pi * 2000 * t)
+            data = np.array(ls_x)
+            # Compute the squared envelope
+            analytic_signal = signal.hilbert(data)
+            envelope = np.abs(analytic_signal)
+            squared_envelope = envelope ** 2
+
+            # Compute the Fourier transform magnitude
+            fft_mag = np.abs(fft(squared_envelope))
+
+            # Compute the frequency axis
+            freqs = fftfreq(len(squared_envelope), 1 / fs)
+            freqs_x = freqs[:len(freqs) // 2]
+            fft_mag_x = fft_mag[:len(freqs) // 2]
+
+            data = np.array(ls_y)
+            analytic_signal = signal.hilbert(data)
+            envelope = np.abs(analytic_signal)
+            squared_envelope = envelope ** 2
+            fft_mag = np.abs(fft(squared_envelope))
+            freqs = fftfreq(len(squared_envelope), 1 / fs)
+            freqs_y = freqs[:len(freqs) // 2]
+            fft_mag_y = fft_mag[:len(freqs) // 2]
+
+            data = np.array(ls_z)
+            analytic_signal = signal.hilbert(data)
+            envelope = np.abs(analytic_signal)
+            squared_envelope = envelope ** 2
+            fft_mag = np.abs(fft(squared_envelope))
+            freqs = fftfreq(len(squared_envelope), 1 / fs)
+            freqs_z = freqs[:len(freqs) // 2]
+            fft_mag_z = fft_mag[:len(freqs) // 2]
+
+            for item in self.plot_9.items():
+                if isinstance(item, pg.TextItem):
+                    self.plot_9.removeItem(item)
+            self.plot_9.clearPlots()
+
+            for item in self.plot_10.items():
+                if isinstance(item, pg.TextItem):
+                    self.plot_10.removeItem(item)
+            self.plot_10.clearPlots()
+
+            for item in self.plot_11.items():
+                if isinstance(item, pg.TextItem):
+                    self.plot_11.removeItem(item)
+            self.plot_11.clearPlots()
+
+            for item in self.plot_12.items():
+                if isinstance(item, pg.TextItem):
+                    self.plot_12.removeItem(item)
+            self.plot_12.clearPlots()
+
+            for item in self.plot_13.items():
+                if isinstance(item, pg.TextItem):
+                    self.plot_13.removeItem(item)
+            self.plot_13.clearPlots()
+
+            for item in self.plot_14.items():
+                if isinstance(item, pg.TextItem):
+                    self.plot_14.removeItem(item)
+            self.plot_14.clearPlots()
+
+            # 绘制时域图
+            self.plot_9.plot(lst, ls_x, pen=pg.mkPen(pg.intColor(0), width=2),
+                             symbol='o', symbolSize=2)
+            self.plot_9.autoRange()
+            self.plot_10.plot(lst, ls_y, pen=pg.mkPen(pg.intColor(0), width=2),
+                             symbol='o', symbolSize=2)
+            self.plot_10.autoRange()
+            self.plot_11.plot(lst, ls_z, pen=pg.mkPen(pg.intColor(0), width=2),
+                             symbol='o', symbolSize=2)
+            self.plot_11.autoRange()
+
+            # # 绘制频谱图，x 轴为频率，y 轴为振幅
+            # self.plot_12.plot(freq_axis_x, amplitude_spectrum_x, pen=pg.mkPen(pg.intColor(0), width=2),
+            #                  symbol='o', symbolSize=2)
+            # self.plot_12.autoRange()
+            # self.plot_13.plot(freq_axis_y, amplitude_spectrum_y, pen=pg.mkPen(pg.intColor(0), width=2),
+            #                   symbol='o', symbolSize=2)
+            # self.plot_13.autoRange()
+            # self.plot_14.plot(freq_axis_z, amplitude_spectrum_z, pen=pg.mkPen(pg.intColor(0), width=2),
+            #                   symbol='o', symbolSize=2)
+            # self.plot_14.autoRange()
+
+            #平方包络的傅立叶变换幅度
+            self.plot_12.plot(freqs_x, fft_mag_x, pen=pg.mkPen(pg.intColor(0), width=2),
+                              symbol='o', symbolSize=2)
+            self.plot_12.autoRange()
+            self.plot_13.plot(freqs_y, fft_mag_y, pen=pg.mkPen(pg.intColor(0), width=2),
+                              symbol='o', symbolSize=2)
+            self.plot_13.autoRange()
+            self.plot_14.plot(freqs_z, fft_mag_z, pen=pg.mkPen(pg.intColor(0), width=2),
+                              symbol='o', symbolSize=2)
+            self.plot_14.autoRange()
 
     def showFileDialog(self):
         # 打开文件选择对话框
@@ -469,6 +601,10 @@ def getdata(shared_data):
             shared_data['shard'] = data
             time.sleep(0.3)
 
+        elif shared_data['flag'][0] == 2:
+            data = RS485.communcation_1024()
+            shared_data['shard'] = data
+            time.sleep(0.3)
 
 if __name__ == '__main__':
     manager = Manager()

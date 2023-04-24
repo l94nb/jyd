@@ -2,8 +2,8 @@ import serial
 import crcmod
 import datetime
 import pymysql
-
-
+import re
+import json
 # CRC16校验，返回整型数
 def crc16(veritydata):
     if not veritydata:
@@ -187,3 +187,123 @@ def communcation(add, startreg, regnums):
 # 位移峰峰值x,y,z 19,20,21
 # 速度有效值、峰值、峭度系数
 # print(communcation(1, 23, 120))
+def mode_change(add, regadd, regval):
+    # regadd：寄存器地址
+    # regval：写入的数
+    slaveadd = add
+    regadd = regadd
+    regval = regval
+    send_data =mmodbus06(slaveadd, regadd, regval)
+    #print(send_data)
+    try:
+        com = serial.Serial("com4", 9600, timeout=0.1)
+    except:
+        return '未连接', '未连接'
+    else:
+        # starttime = time.time()
+        com.write(send_data)
+        # print(send_data)
+
+        recv_data = com.read(regval * 2 + 5)
+        print(recv_data)
+        #
+        com.close()
+
+# def communcation_1024():
+#     #mode_change(1, 163, 7)
+#     mode_change(1, 161, 4)
+#     mode_change(1, 160, 44)
+#     ls=[]
+#     data=''
+#     com = serial.Serial("com4", 9600, timeout=0.1) # 打开串口，注意修改COM1为实际端口号
+#     while True:
+#         data_line = com.readline().decode('utf-8') # 读取一行数据并解码为字符串
+#         data = data + data_line
+#         if data.count('"SpdX"')==2:
+#             com.close()
+#             break
+#
+#     data = data.replace('\n', '')
+#     indices = []
+#     index = 0
+#     while True:
+#         try:
+#             index = data.index("SpdX", index)
+#             indices.append(index)
+#             index += 1
+#         except ValueError:
+#             break
+#     raw_str = data[indices[0] - 1:indices[1] - 47]
+#     raw_str = '{' + raw_str
+#     # 将原始字符串分割成每个数据包的字符串
+#     packet_str_list = re.findall(r'{.*?}', raw_str)
+#     #print(packet_str_list)
+#     # 针对每个数据包提取"SpdX"、"SpdY"、"SpdZ"
+#     ls_x = []
+#     ls_y = []
+#     ls_z = []
+#     for packet_str in packet_str_list:
+#         packet_dict = json.loads(packet_str)
+#         if "SpdX" in packet_dict:
+#             ls_x.extend(packet_dict["SpdX"])
+#         if "SpdY" in packet_dict:
+#             ls_y.extend(packet_dict["SpdY"])
+#         if "SpdZ" in packet_dict:
+#             ls_z.extend(packet_dict["SpdZ"])
+#     ls.append(ls_x)
+#     ls.append(ls_y)
+#     ls.append(ls_z)
+#     print(ls)
+#     return ls
+
+
+    # print(ls_x)
+    # print(ls_y)
+    # print(ls_z)
+#
+def communcation_1024():
+    #mode_change(1, 163, 7)
+    mode_change(1, 161, 4)
+    mode_change(1, 160, 44)
+    ls=[]
+    data=''
+    com = serial.Serial("com4", 9600, timeout=0.1) # 打开串口，注意修改COM1为实际端口号
+    while True:
+        data_line = com.readline().decode('utf-8') # 读取一行数据并解码为字符串
+        data = data + data_line
+        if data.count('"AccX"')==2:
+            com.close()
+            break
+
+    data = data.replace('\n', '')
+    indices = []
+    index = 0
+    while True:
+        try:
+            index = data.index("AccX", index)
+            indices.append(index)
+            index += 1
+        except ValueError:
+            break
+    raw_str = data[indices[0] - 1:indices[1] - 47]
+    raw_str = '{' + raw_str
+    # 将原始字符串分割成每个数据包的字符串
+    packet_str_list = re.findall(r'{.*?}', raw_str)
+    #print(packet_str_list)
+    # 针对每个数据包提取"SpdX"、"SpdY"、"SpdZ"
+    ls_x = []
+    ls_y = []
+    ls_z = []
+    for packet_str in packet_str_list:
+        packet_dict = json.loads(packet_str)
+        if "AccX" in packet_dict:
+            ls_x.extend(packet_dict["AccX"])
+        if "AccY" in packet_dict:
+            ls_y.extend(packet_dict["AccY"])
+        if "AccZ" in packet_dict:
+            ls_z.extend(packet_dict["AccZ"])
+    ls.append(ls_x)
+    ls.append(ls_y)
+    ls.append(ls_z)
+    print(ls)
+    return ls
