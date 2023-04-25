@@ -23,11 +23,12 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.retranslateUi(self)
         self.shared_data = shared_data
+        self.flag = 0
         self.stackedWidget.setMaximumHeight(900)
         self.showMaximized()
         self.init()
 
-        #self.showMaximized()
+        # self.showMaximized()
         # self.comboBox.currentIndexChanged.connect(self.updateplot)
         # self.comboBox_2.currentIndexChanged.connect(self.updateplot_2)
         # self.comboBox_3.currentIndexChanged.connect(self.updateplot_3)
@@ -51,7 +52,6 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
         self.timer.start()  # 1000=1s
         self.timer1.start()
-
 
     def init(self):
         ls = ['x轴振动速度RMS平均值', 'y轴振动速度RMS平均值', 'z轴振动速度RMS平均值', 'x轴振动加速度RMS平均值', 'y轴振动加速度RMS平均值', 'z轴振动加速度RMS平均值',
@@ -231,7 +231,6 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.pushButton.setText('Select File')
         self.pushButton.clicked.connect(self.showFileDialog)
 
-
     def stackedChanged(self, index):
         if index == 0:
             self.timer2.stop()
@@ -251,8 +250,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             self.timer.stop()
             self.timer1.stop()
             self.stackedWidget.setCurrentIndex(2)
+            self.flag = self.flag + 1
             temp = self.shared_data['flag']
             temp[0] = 2
+            temp[1] = self.flag
             self.shared_data['flag'] = temp
             self.timer2.start()
 
@@ -262,7 +263,6 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
         elif index == 1:
             self.timer1.stop()
-
 
     def updateData(self):
         # if len(self.shared_data['shard'])>=20:
@@ -276,7 +276,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                     else:
                         item = QtWidgets.QTableWidgetItem(str(self.shared_data['shard'][i]))
                         self.tableWidget.setItem(row, col, item)
-                        #print(row, col, item)
+                        # print(row, col, item)
                         if col == 5 or col == 7 or col == 9:
                             if row < 3:
                                 row += 1
@@ -291,14 +291,14 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                                 col += 2
 
         elif self.stackedWidget.currentIndex() == 1:
-            #print(1)
+            # print(1)
             if type(self.shared_data['shard']) == list:
                 row = 0
                 col = 1
                 for i in range(len(self.shared_data['shard'])):
                     item = QtWidgets.QTableWidgetItem(str(self.shared_data['shard'][i]))
                     self.tableWidget_2.setItem(row, col, item)
-                    #print(row, col, item)
+                    # print(row, col, item)
                     if row < 19:
                         row += 1
                     else:
@@ -345,22 +345,22 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             #     T = 0.2
             #     yf = fft(xdata)
             #     xf = fftfreq(N, T)[:N // 2]
-                # t_new = np.linspace(xtime[0], xtime[-1], 1000)
-                # x_resampled = np.interp(t_new, xtime, xdata)
-                #
-                # N = len(x_resampled)
-                # T = t_new[1] - t_new[0]
-                # yf = fft(x_resampled)
-                # xf = fftfreq(N, T)[:N // 2]
+            # t_new = np.linspace(xtime[0], xtime[-1], 1000)
+            # x_resampled = np.interp(t_new, xtime, xdata)
+            #
+            # N = len(x_resampled)
+            # T = t_new[1] - t_new[0]
+            # yf = fft(x_resampled)
+            # xf = fftfreq(N, T)[:N // 2]
 
-                # for item in self.plot_4.items():
-                #     if isinstance(item, pg.TextItem):
-                #         self.plot_4.removeItem(item)
-                # self.plot_4.clearPlots()
-                # # 20 * np.log10(2.0 / N * np.abs(yf[:N // 2]))
-                # self.plot_4.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
-                # self.plot_4.autoRange()
-                # self.plot_4.setRange(xRange=[1, np.max(xf)],yRange=[0.01, 10])
+            # for item in self.plot_4.items():
+            #     if isinstance(item, pg.TextItem):
+            #         self.plot_4.removeItem(item)
+            # self.plot_4.clearPlots()
+            # # 20 * np.log10(2.0 / N * np.abs(yf[:N // 2]))
+            # self.plot_4.plot(xf, 2.0 / N * np.abs(yf[:N // 2]), pen=pg.mkPen(pg.intColor(0), width=2))
+            # self.plot_4.autoRange()
+            # self.plot_4.setRange(xRange=[1, np.max(xf)],yRange=[0.01, 10])
             # else:
             #     if len(xdata)%2!=0:
             #         xdata = savgol_filter(xdata, len(xdata), order)
@@ -520,10 +520,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                              symbol='o', symbolSize=2)
             self.plot_9.autoRange()
             self.plot_10.plot(lst, ls_y, pen=pg.mkPen(pg.intColor(0), width=2),
-                             symbol='o', symbolSize=2)
+                              symbol='o', symbolSize=2)
             self.plot_10.autoRange()
             self.plot_11.plot(lst, ls_z, pen=pg.mkPen(pg.intColor(0), width=2),
-                             symbol='o', symbolSize=2)
+                              symbol='o', symbolSize=2)
             self.plot_11.autoRange()
 
             # # 绘制频谱图，x 轴为频率，y 轴为振幅
@@ -537,7 +537,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             #                   symbol='o', symbolSize=2)
             # self.plot_14.autoRange()
 
-            #平方包络的傅立叶变换幅度
+            # 平方包络的傅立叶变换幅度
             self.plot_12.plot(freqs_x, fft_mag_x, pen=pg.mkPen(pg.intColor(0), width=2),
                               symbol='o', symbolSize=2)
             self.plot_12.autoRange()
@@ -591,12 +591,19 @@ def show(shared_data):
 
 def getdata(shared_data):
     while True:
+        flag = 0
         if shared_data['flag'][0] == 0:
+            if shared_data['flag'][1] != flag:
+                RS485.restart(255, 3, 30, 10)
+                flag = flag + 1
             data = RS485.communcation(1, 0, 22)
             shared_data['shard'] = data
             time.sleep(0.2)
 
         elif shared_data['flag'][0] == 1:
+            if shared_data['flag'][1] != flag:
+                RS485.restart(255, 3, 30, 10)
+                flag = flag + 1
             data = RS485.communcation(1, 23, 120)
             shared_data['shard'] = data
             time.sleep(0.3)
@@ -606,10 +613,11 @@ def getdata(shared_data):
             shared_data['shard'] = data
             time.sleep(0.3)
 
+
 if __name__ == '__main__':
     manager = Manager()
     ls = []
-    ls_2 = [0]
+    ls_2 = [0, 0]
     shared_data = manager.dict({'shard': ls, 'flag': ls_2})
     p1 = Process(target=show, args=(shared_data,))
     p2 = Process(target=getdata, args=(shared_data,))

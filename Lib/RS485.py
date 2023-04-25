@@ -54,6 +54,7 @@ def mmodbus03or04(add, startregadd, regnum, funcode=3):
     return sendbytes
 
 def mmodbus06(add, regadd, regval, funcode=6):
+    #print(funcode.to_bytes(1, byteorder="big", signed=False))
     sendbytes = add.to_bytes(1, byteorder="big", signed=False)  # 转进制，大端符合传输，小段符合计算机存储
     sendbytes = sendbytes + funcode.to_bytes(1, byteorder="big", signed=False) + regadd.to_bytes(2,
                                                                                                       byteorder="big",
@@ -194,7 +195,7 @@ def mode_change(add, regadd, regval):
     regadd = regadd
     regval = regval
     send_data =mmodbus06(slaveadd, regadd, regval)
-    #print(send_data)
+    print(send_data)
     try:
         com = serial.Serial("com4", 9600, timeout=0.1)
     except:
@@ -307,3 +308,41 @@ def communcation_1024():
     ls.append(ls_z)
     print(ls)
     return ls
+
+def restart(add, regadd, regval, funcode):
+    # regadd：寄存器地址
+    # regval：写入的数
+    slaveadd = add
+    regadd = regadd
+    regval = regval
+    temp = 1024
+    temp_2 = 2
+    sendbytes = slaveadd.to_bytes(1, byteorder="big", signed=False)  # 转进制，大端符合传输，小段符合计算机存储
+    sendbytes = sendbytes + funcode.to_bytes(1, byteorder="big", signed=False) + regadd.to_bytes(2, byteorder="big", signed=False) + \
+                temp_2.to_bytes(2, byteorder="big", signed=False) + temp.to_bytes(2, byteorder="big", signed=False) + \
+                temp_2.to_bytes(1, byteorder="big", signed=False) + regval.to_bytes(2, byteorder="big", signed=False)
+    crcres = crc16(sendbytes)
+    print(crcres)
+    crc16bytes = crcres.to_bytes(2, byteorder="little", signed=False)
+    print(crc16bytes)
+    sendbytes = sendbytes + crc16bytes
+    send_data = sendbytes
+    print(checkcrc(send_data))
+    #return sendbytes
+    #send_data =mmodbus06(slaveadd, regadd, regval, funcode)
+    print(send_data)
+    try:
+        com = serial.Serial("com4", 9600, timeout=0.1)
+    except:
+        return '未连接', '未连接'
+    else:
+        # starttime = time.time()
+        com.write(send_data)
+        # print(send_data)
+
+        recv_data = com.read(regval * 2 + 5)
+        print(recv_data)
+        #
+        com.close()
+
+restart(255,3,30,10)
