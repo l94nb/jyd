@@ -5,7 +5,7 @@ from mainwindow import Ui_MainWindow
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 import pyqtgraph as pg
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTimer
 import datetime
@@ -14,7 +14,8 @@ from scipy import signal
 import scipy.io as sio
 from scipy.fft import fft, fftfreq
 import numpy as np
-
+import matlab.engine
+import matlab
 
 class DemoMain(QMainWindow, Ui_MainWindow):
     def __init__(self, shared_data):
@@ -128,7 +129,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         # self.stackedWidget.setCurrentIndex(2)
         # self.tableWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        self.tableWidget_2.setRowCount(20)
+        self.tableWidget_2.setRowCount(21)
         self.tableWidget_2.setColumnCount(12)
         # self.tableWidget.setHorizontalHeaderLabels(['名称1', '数值1'])
         row = 0
@@ -141,6 +142,14 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             else:
                 row = 0
                 col += 2
+        item = QtWidgets.QTableWidgetItem('内圈特征频率')
+        self.tableWidget_2.setItem(20, 0, item)
+        item = QtWidgets.QTableWidgetItem('外圈特征频率')
+        self.tableWidget_2.setItem(20, 2, item)
+        item = QtWidgets.QTableWidgetItem('保持架特征频率')
+        self.tableWidget_2.setItem(20, 4, item)
+
+
         self.tableWidget_2.verticalHeader().setVisible(False)
         self.tableWidget_2.horizontalHeader().setVisible(False)  # 行列序号取消
         self.tableWidget_2.resizeColumnsToContents()  # 根据内容调整列宽
@@ -148,6 +157,29 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.tableWidget_2.setFixedHeight(800)
         # self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.tableWidget_2.horizontalHeader().setMinimumSectionSize(100)
+
+        self.tableWidget_3.setRowCount(2)
+        self.tableWidget_3.setColumnCount(10)
+
+        item = QtWidgets.QTableWidgetItem('滚珠个数')
+        self.tableWidget_3.setItem(0, 0, item)
+        item = QtWidgets.QTableWidgetItem('滚珠直径')
+        self.tableWidget_3.setItem(0, 2, item)
+        item = QtWidgets.QTableWidgetItem('滚道节径')
+        self.tableWidget_3.setItem(0, 4, item)
+        item = QtWidgets.QTableWidgetItem('接触角')
+        self.tableWidget_3.setItem(0, 6, item)
+        item = QtWidgets.QTableWidgetItem('转速')
+        self.tableWidget_3.setItem(0, 8, item)
+
+
+        self.tableWidget_3.verticalHeader().setVisible(False)
+        self.tableWidget_3.horizontalHeader().setVisible(False)  # 行列序号取消
+        self.tableWidget_3.resizeColumnsToContents()  # 根据内容调整列宽
+        # self.tableWidget.resizeRowsToContents()#根据内容调整行高
+        self.tableWidget_3.setFixedHeight(200)
+        self.tableWidget_3.horizontalHeader().setMinimumSectionSize(100)
+
 
         pg.setConfigOptions(antialias=True)
         self.plot = pg.PlotWidget()
@@ -171,8 +203,8 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.plot_10 = pg.PlotWidget()
         self.plot_11 = pg.PlotWidget()
         self.plot_12 = pg.PlotWidget()
-        self.plot_13 = pg.PlotWidget()
-        self.plot_14 = pg.PlotWidget()
+        # self.plot_13 = pg.PlotWidget()
+        # self.plot_14 = pg.PlotWidget()
 
         # self.widget_4.setLayout(QtWidgets.QVBoxLayout())
         # self.widget_4.layout().addWidget(self.plot_4)
@@ -193,10 +225,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.widget_11.layout().addWidget(self.plot_11)
         self.widget_12.setLayout(QtWidgets.QVBoxLayout())
         self.widget_12.layout().addWidget(self.plot_12)
-        self.widget_13.setLayout(QtWidgets.QVBoxLayout())
-        self.widget_13.layout().addWidget(self.plot_13)
-        self.widget_14.setLayout(QtWidgets.QVBoxLayout())
-        self.widget_14.layout().addWidget(self.plot_14)
+        # self.widget_13.setLayout(QtWidgets.QVBoxLayout())
+        # self.widget_13.layout().addWidget(self.plot_13)
+        # self.widget_14.setLayout(QtWidgets.QVBoxLayout())
+        # self.widget_14.layout().addWidget(self.plot_14)
 
         # self.plot.plot(self.x, self.y, pen=pg.mkPen('b', width=2))
         # 设置 x 轴范围为 0-3000毫秒，y 轴范围为 0-10
@@ -225,8 +257,11 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.comboBox_4.addItem('z轴振动加速度')
         self.comboBox_4.addItem('z轴位移')
 
-        self.comboBox_5.addItem('三轴时域')
-        self.comboBox_5.addItem('三轴频域')
+        self.comboBox_5.addItem('x轴')
+        self.comboBox_5.addItem('y轴')
+        self.comboBox_5.addItem('z轴')
+        self.comboBox_6.addItem('内圈故障分析')
+        self.comboBox_6.addItem('外圈故障分析')
 
         self.pushButton.setText('Select File')
         self.pushButton.clicked.connect(self.showFileDialog)
@@ -235,11 +270,13 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         if index == 0:
             self.timer2.stop()
             self.timer1.start()
+            self.timer.start()
             self.stackedWidget.setCurrentIndex(0)
             temp = self.shared_data['flag']
             temp[0] = 0
             self.shared_data['flag'] = temp
         elif index == 1:
+            self.timer.start()
             self.timer2.stop()
             self.timer1.stop()
             self.stackedWidget.setCurrentIndex(1)
@@ -259,9 +296,11 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
     def tabChanged(self, index):
         if index == 0:
+            self.timer.start()
             self.timer1.start()
 
         elif index == 1:
+            self.timer.stop()
             self.timer1.stop()
 
     def updateData(self):
@@ -427,64 +466,88 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             self.plot_3.setRange(xRange=[0, 30000])
 
     def update_plotdata_1024(self):
-        if len(self.shared_data['shard']) == 3:
-            lst = [i for i in range(1024)]
-            ls_x = self.shared_data['shard'][0]
-            ls_y = self.shared_data['shard'][1]
-            ls_z = self.shared_data['shard'][2]
+        # if len(self.shared_data['shard']) == 3:
+        #     lst = [i for i in range(1024)]
+        #     ls_x = self.shared_data['shard'][0]
+        #     ls_y = self.shared_data['shard'][1]
+        #     ls_z = self.shared_data['shard'][2]
+        #
+        #     # sampling_rate = 6500
+        #     # # 对数据进行傅里叶变换
+        #     # fft_result = fft(ls_x)
+        #     # # 计算频率轴，根据采样率和数据长度
+        #     # freq_axis_x = np.linspace(0, sampling_rate, len(ls_x))
+        #     # # 可以用以下方式获取幅值谱
+        #     # amplitude_spectrum_x = np.abs(fft_result)
+        #     # # 可以用以下方式获取相位谱
+        #     # # phase_spectrum = np.angle(fft_result)
+        #     # fft_result = fft(ls_y)
+        #     # freq_axis_y = np.linspace(0, sampling_rate, len(ls_y))
+        #     # amplitude_spectrum_y = np.abs(fft_result)
+        #     #
+        #     # fft_result = fft(ls_z)
+        #     # freq_axis_z = np.linspace(0, sampling_rate, len(ls_z))
+        #     # amplitude_spectrum_z = np.abs(fft_result)
+        #
+        #     fs = 6500
+        #     t = np.arange(1024) / fs
+        #     x = np.sin(2 * np.pi * 1000 * t) + 0.5 * np.sin(2 * np.pi * 2000 * t)
+        #     data = np.array(ls_x)
+        #     # Compute the squared envelope
+        #     analytic_signal = signal.hilbert(data)
+        #     envelope = np.abs(analytic_signal)
+        #     squared_envelope = envelope ** 2
+        #
+        #     # Compute the Fourier transform magnitude
+        #     fft_mag = np.abs(fft(squared_envelope))
+        #
+        #     # Compute the frequency axis
+        #     freqs = fftfreq(len(squared_envelope), 1 / fs)
+        #     freqs_x = freqs[:len(freqs) // 2]
+        #     fft_mag_x = fft_mag[:len(freqs) // 2]
+        #
+        #     data = np.array(ls_y)
+        #     analytic_signal = signal.hilbert(data)
+        #     envelope = np.abs(analytic_signal)
+        #     squared_envelope = envelope ** 2
+        #     fft_mag = np.abs(fft(squared_envelope))
+        #     freqs = fftfreq(len(squared_envelope), 1 / fs)
+        #     freqs_y = freqs[:len(freqs) // 2]
+        #     fft_mag_y = fft_mag[:len(freqs) // 2]
+        #
+        #     data = np.array(ls_z)
+        #     analytic_signal = signal.hilbert(data)
+        #     envelope = np.abs(analytic_signal)
+        #     squared_envelope = envelope ** 2
+        #     fft_mag = np.abs(fft(squared_envelope))
+        #     freqs = fftfreq(len(squared_envelope), 1 / fs)
+        #     freqs_z = freqs[:len(freqs) // 2]
+        #     fft_mag_z = fft_mag[:len(freqs) // 2]
+        if len(self.shared_data['shard']) == 10240:
+            print(self.shared_data['shard'])
+            lst = [i for i in range(10240)]
+            gsdi = matlab.double(self.shared_data['shard'])
+            srdi = 6500.0
+            # ---------------外圈加速度和采样率获取------------------------------
+            # gso = scio.loadmat(path_mat)['gso']
+            # sro = scio.loadmat(path_mat)['sro']
+            # gsdo = matlab.double(gso.tolist())
+            # srdo = matlab.double(sro.tolist())
 
-            # sampling_rate = 6500
-            # # 对数据进行傅里叶变换
-            # fft_result = fft(ls_x)
-            # # 计算频率轴，根据采样率和数据长度
-            # freq_axis_x = np.linspace(0, sampling_rate, len(ls_x))
-            # # 可以用以下方式获取幅值谱
-            # amplitude_spectrum_x = np.abs(fft_result)
-            # # 可以用以下方式获取相位谱
-            # # phase_spectrum = np.angle(fft_result)
-            # fft_result = fft(ls_y)
-            # freq_axis_y = np.linspace(0, sampling_rate, len(ls_y))
-            # amplitude_spectrum_y = np.abs(fft_result)
-            #
-            # fft_result = fft(ls_z)
-            # freq_axis_z = np.linspace(0, sampling_rate, len(ls_z))
-            # amplitude_spectrum_z = np.abs(fft_result)
-
-            fs = 6500
-            t = np.arange(1024) / fs
-            x = np.sin(2 * np.pi * 1000 * t) + 0.5 * np.sin(2 * np.pi * 2000 * t)
-            data = np.array(ls_x)
-            # Compute the squared envelope
-            analytic_signal = signal.hilbert(data)
-            envelope = np.abs(analytic_signal)
-            squared_envelope = envelope ** 2
-
-            # Compute the Fourier transform magnitude
-            fft_mag = np.abs(fft(squared_envelope))
-
-            # Compute the frequency axis
-            freqs = fftfreq(len(squared_envelope), 1 / fs)
-            freqs_x = freqs[:len(freqs) // 2]
-            fft_mag_x = fft_mag[:len(freqs) // 2]
-
-            data = np.array(ls_y)
-            analytic_signal = signal.hilbert(data)
-            envelope = np.abs(analytic_signal)
-            squared_envelope = envelope ** 2
-            fft_mag = np.abs(fft(squared_envelope))
-            freqs = fftfreq(len(squared_envelope), 1 / fs)
-            freqs_y = freqs[:len(freqs) // 2]
-            fft_mag_y = fft_mag[:len(freqs) // 2]
-
-            data = np.array(ls_z)
-            analytic_signal = signal.hilbert(data)
-            envelope = np.abs(analytic_signal)
-            squared_envelope = envelope ** 2
-            fft_mag = np.abs(fft(squared_envelope))
-            freqs = fftfreq(len(squared_envelope), 1 / fs)
-            freqs_z = freqs[:len(freqs) // 2]
-            fft_mag_z = fft_mag[:len(freqs) // 2]
-
+            eng = matlab.engine.start_matlab()  # 可以调用matlab的内置函数。
+            # ------------内圈特征频率分析-----------------------------------------
+            # print('kurtosis=',eng.kurtosis(gsdi))
+            [pInner, fpInner] = eng.pspectrum(gsdi, srdi, nargout=2)  # 采集信号的直接功率谱图，x轴频率，y轴功率谱大小2222222222222
+            [pEnvInner, fEnvInner, xEnvInner, tEnvInner] = eng.envspectrum(gsdi, srdi,
+                                                                           nargout=4)  # 包络谱分析； # fEnvInner,频率；pEnvInner,包络谱峰值； xEnvInner,包络大小，tEnvInner，时间
+            # eng.plot(tEnvInner[1:3000], xEnvInner[1:3000])  # title: 时间VS包络；[]中的范围可以根据大小修改
+            # eng.plot(fEnvInner[1:3000], pEnvInner[1:3000])  # title :如果是内圈故障的话，直接分析包络，得到内圈特征频率，频率vs包络谱
+            fpInner = [item for sublist in fpInner for item in sublist]
+            pInner = [item for sublist in pInner for item in sublist]
+            pEnvInner = [item for sublist in pEnvInner for item in sublist]
+            fEnvInner = [item for sublist in fEnvInner for item in sublist]
+            xEnvInner = [item for sublist in xEnvInner for item in sublist]
+            tEnvInner = [item for sublist in tEnvInner for item in sublist]
             for item in self.plot_9.items():
                 if isinstance(item, pg.TextItem):
                     self.plot_9.removeItem(item)
@@ -505,25 +568,24 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                     self.plot_12.removeItem(item)
             self.plot_12.clearPlots()
 
-            for item in self.plot_13.items():
-                if isinstance(item, pg.TextItem):
-                    self.plot_13.removeItem(item)
-            self.plot_13.clearPlots()
-
-            for item in self.plot_14.items():
-                if isinstance(item, pg.TextItem):
-                    self.plot_14.removeItem(item)
-            self.plot_14.clearPlots()
+            # for item in self.plot_13.items():
+            #     if isinstance(item, pg.TextItem):
+            #         self.plot_13.removeItem(item)
+            # self.plot_13.clearPlots()
+            #
+            # for item in self.plot_14.items():
+            #     if isinstance(item, pg.TextItem):
+            #         self.plot_14.removeItem(item)
+            # self.plot_14.clearPlots()
 
             # 绘制时域图
-            self.plot_9.plot(lst, ls_x, pen=pg.mkPen(pg.intColor(0), width=2),
-                             symbol='o', symbolSize=2)
+            self.plot_9.plot(lst, self.shared_data['shard'], pen=pg.mkPen(pg.intColor(0), width=2))#,symbol='o', symbolSize=2
             self.plot_9.autoRange()
-            self.plot_10.plot(lst, ls_y, pen=pg.mkPen(pg.intColor(0), width=2),
-                              symbol='o', symbolSize=2)
+
+            self.plot_10.plot(fpInner, pInner, pen=pg.mkPen(pg.intColor(0), width=2))
             self.plot_10.autoRange()
-            self.plot_11.plot(lst, ls_z, pen=pg.mkPen(pg.intColor(0), width=2),
-                              symbol='o', symbolSize=2)
+
+            self.plot_11.plot(tEnvInner, xEnvInner, pen=pg.mkPen(pg.intColor(0), width=2))
             self.plot_11.autoRange()
 
             # # 绘制频谱图，x 轴为频率，y 轴为振幅
@@ -538,15 +600,14 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             # self.plot_14.autoRange()
 
             # 平方包络的傅立叶变换幅度
-            self.plot_12.plot(freqs_x, fft_mag_x, pen=pg.mkPen(pg.intColor(0), width=2),
-                              symbol='o', symbolSize=2)
+            self.plot_12.plot(fEnvInner, pEnvInner, pen=pg.mkPen(pg.intColor(0), width=2))
             self.plot_12.autoRange()
-            self.plot_13.plot(freqs_y, fft_mag_y, pen=pg.mkPen(pg.intColor(0), width=2),
-                              symbol='o', symbolSize=2)
-            self.plot_13.autoRange()
-            self.plot_14.plot(freqs_z, fft_mag_z, pen=pg.mkPen(pg.intColor(0), width=2),
-                              symbol='o', symbolSize=2)
-            self.plot_14.autoRange()
+            # self.plot_13.plot(freqs_y, fft_mag_y, pen=pg.mkPen(pg.intColor(0), width=2),
+            #                   symbol='o', symbolSize=2)
+            # self.plot_13.autoRange()
+            # self.plot_14.plot(freqs_z, fft_mag_z, pen=pg.mkPen(pg.intColor(0), width=2),
+            #                   symbol='o', symbolSize=2)
+            # self.plot_14.autoRange()
 
     def showFileDialog(self):
         # 打开文件选择对话框
@@ -590,20 +651,20 @@ def show(shared_data):
 
 
 def getdata(shared_data):
+    # flag = 0
     while True:
-        flag = 0
         if shared_data['flag'][0] == 0:
-            if shared_data['flag'][1] != flag:
-                RS485.restart(255, 3, 30, 10)
-                flag = flag + 1
+            # if shared_data['flag'][1] != flag:
+            #     RS485.restart(255, 3, 30, 10)
+            #     flag = flag + 1
             data = RS485.communcation(1, 0, 22)
             shared_data['shard'] = data
             time.sleep(0.2)
 
         elif shared_data['flag'][0] == 1:
-            if shared_data['flag'][1] != flag:
-                RS485.restart(255, 3, 30, 10)
-                flag = flag + 1
+            # if shared_data['flag'][1] != flag:
+            #     RS485.restart(255, 3, 30, 10)
+            #     flag = flag + 1
             data = RS485.communcation(1, 23, 120)
             shared_data['shard'] = data
             time.sleep(0.3)
@@ -611,7 +672,7 @@ def getdata(shared_data):
         elif shared_data['flag'][0] == 2:
             data = RS485.communcation_1024()
             shared_data['shard'] = data
-            time.sleep(0.3)
+            time.sleep(1000)
 
 
 if __name__ == '__main__':
