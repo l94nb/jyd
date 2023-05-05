@@ -262,54 +262,65 @@ def mode_change(add, regadd, regval):
     # print(ls_y)
     # print(ls_z)
 #
-def communcation_1024():
+def communcation_1024(mode):
     #mode_change(1, 163, 7)
-    mode_change(1, 161, 5)
+    if mode == 5:
+        key = "AccX"
+    elif mode == 6:
+        key = "AccY"
+    elif mode == 7:
+        key = "AccZ"
+    mode_change(1, 161, mode)
     mode_change(1, 160, 44)
     ls=[]
     data=''
-    com = serial.Serial("com4", 9600, timeout=0.1) # 打开串口，注意修改COM1为实际端口号
-    while True:
-        data_line = com.readline().decode('utf-8') # 读取一行数据并解码为字符串
-        data = data + data_line
-        if data.count('"AccX"')==11:
-            com.close()
-            break
+    try:
+        com = serial.Serial("com4", 9600, timeout=0.1)
+    except:
+        return '未连接', '未连接'
+    else:
 
-    data = data.replace('\n', '')
-    indices = []
-    index = 0
-    while True:
-        try:
-            index = data.index("AccX", index)
-            indices.append(index)
-            index += 1
-        except ValueError:
-            break
-    raw_str = data[indices[0] - 1:indices[10]] #- 47
-    raw_str = '{' + raw_str
-    # 将原始字符串分割成每个数据包的字符串
-    packet_str_list = re.findall(r'{.*?}', raw_str)
-    #print(packet_str_list)
-    # 针对每个数据包提取"SpdX"、"SpdY"、"SpdZ"
-    ls_x = []
-    # ls_y = []
-    # ls_z = []
-    for packet_str in packet_str_list:
-        packet_dict = json.loads(packet_str)
-        if "AccX" in packet_dict:
-            ls_x.extend(packet_dict["AccX"])
-        # if "AccY" in packet_dict:
-        #     ls_y.extend(packet_dict["AccY"])
-        # if "AccZ" in packet_dict:
-        #     ls_z.extend(packet_dict["AccZ"])
-    # for i in ls_x:
-    #     ls = ls +i
+        while True:
+            data_line = com.readline().decode('utf-8') # 读取一行数据并解码为字符串
+            data = data + data_line
+            if data.count(key)==11:
+                com.close()
+                break
 
-    # ls.append(ls_y)
-    # ls.append(ls_z)
+        data = data.replace('\n', '')
+        indices = []
+        index = 0
+        while True:
+            try:
+                index = data.index(key, index)
+                indices.append(index)
+                index += 1
+            except ValueError:
+                break
+        raw_str = data[indices[0] - 1:indices[10]] #- 47
+        raw_str = '{' + raw_str
+        # 将原始字符串分割成每个数据包的字符串
+        packet_str_list = re.findall(r'{.*?}', raw_str)
+        #print(packet_str_list)
+        # 针对每个数据包提取"SpdX"、"SpdY"、"SpdZ"
+        # ls_x = []
+        # ls_y = []
+        # ls_z = []
+        for packet_str in packet_str_list:
+            packet_dict = json.loads(packet_str)
+            if key in packet_dict:
+                ls.extend(packet_dict[key])
+            # if "AccY" in packet_dict:
+            #     ls_y.extend(packet_dict["AccY"])
+            # if "AccZ" in packet_dict:
+            #     ls_z.extend(packet_dict["AccZ"])
+        # for i in ls_x:
+        #     ls = ls +i
 
-    return ls_x
+        # ls.append(ls_y)
+        # ls.append(ls_z)
+
+        return ls
 
 def restart(add, regadd, regval, funcode):
     # regadd：寄存器地址
