@@ -17,6 +17,11 @@ import numpy as np
 import matlab.engine
 import matlab
 import math
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
 class DemoMain(QMainWindow, Ui_MainWindow):
     def __init__(self, shared_data):
         # 初始化父类
@@ -152,7 +157,6 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         item = QtWidgets.QTableWidgetItem('保持架特征频率')
         self.tableWidget_2.setItem(20, 4, item)
 
-
         self.tableWidget_2.verticalHeader().setVisible(False)
         self.tableWidget_2.horizontalHeader().setVisible(False)  # 行列序号取消
         self.tableWidget_2.resizeColumnsToContents()  # 根据内容调整列宽
@@ -190,7 +194,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.pushButton_3 = QtWidgets.QPushButton()
         self.pushButton_3.setText('计算特征值')
         self.tableWidget_3.setSpan(0, 10, 1, 2)  # 第2行3~6列合并为1个单元格
-        self.tableWidget_3.setIndexWidget(self.tableWidget_3.model().index(0,10), self.pushButton_3)  # 第0行，第0列的单元格添加按钮
+        self.tableWidget_3.setIndexWidget(self.tableWidget_3.model().index(0, 10), self.pushButton_3)  # 第0行，第0列的单元格添加按钮
 
         self.tableWidget_3.verticalHeader().setVisible(False)
         self.tableWidget_3.horizontalHeader().setVisible(False)  # 行列序号取消
@@ -198,7 +202,6 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         # self.tableWidget.resizeRowsToContents()#根据内容调整行高
         self.tableWidget_3.setFixedHeight(100)
         self.tableWidget_3.horizontalHeader().setMinimumSectionSize(100)
-
 
         pg.setConfigOptions(antialias=True)
         self.plot = pg.PlotWidget()
@@ -213,7 +216,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
         self.plot_4 = pg.PlotWidget()
         self.plot_5 = pg.PlotWidget()
-        self.plot_6 = pg.PlotWidget()
+        #self.plot_6 = pg.PlotWidget()
 
         self.plot_7 = pg.PlotWidget()
         self.plot_8 = pg.PlotWidget()
@@ -226,12 +229,28 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.plot_14 = pg.PlotWidget()
         self.plot_15 = pg.PlotWidget()
 
+        self.plot.setBackground('w')
+        self.plot_2.setBackground('w')
+        self.plot_3.setBackground('w')
+        self.plot_4.setBackground('w')
+        self.plot_5.setBackground('w')
+        #self.plot_6.setBackground('w')
+        self.plot_7.setBackground('w')
+        self.plot_8.setBackground('w')
+        self.plot_9.setBackground('w')
+        self.plot_10.setBackground('w')
+        self.plot_11.setBackground('w')
+        self.plot_12.setBackground('w')
+        self.plot_13.setBackground('w')
+        self.plot_14.setBackground('w')
+        self.plot_15.setBackground('w')
+
         self.widget_4.setLayout(QtWidgets.QVBoxLayout())
         self.widget_4.layout().addWidget(self.plot_4)
         self.widget_5.setLayout(QtWidgets.QVBoxLayout())
         self.widget_5.layout().addWidget(self.plot_5)
         self.widget_6.setLayout(QtWidgets.QVBoxLayout())
-        self.widget_6.layout().addWidget(self.plot_6)
+        #self.widget_6.layout().addWidget(self.plot_6)
         self.widget_7.setLayout(QtWidgets.QVBoxLayout())
         self.widget_7.layout().addWidget(self.plot_7)
         self.widget_8.setLayout(QtWidgets.QVBoxLayout())
@@ -270,32 +289,40 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
         self.plot_9.setLabel('top', '实时加速度波形')
         self.plot_9.getAxis('top').setStyle(tickLength=0, showValues=False)
-        self.plot_9.getAxis('top').setPen(pg.mkPen(None))
+        self.plot_9.getAxis('top').setPen(pg.mkPen('k'))
         self.plot_10.setLabel('top', '实时功率谱图形')
         self.plot_10.getAxis('top').setStyle(tickLength=0, showValues=False)
-        self.plot_10.getAxis('top').setPen(pg.mkPen(None))
+        self.plot_10.getAxis('top').setPen(pg.mkPen('k'))
         self.plot_11.setLabel('top', '实时加速度包络图形')
         self.plot_11.getAxis('top').setStyle(tickLength=0, showValues=False)
-        self.plot_11.getAxis('top').setPen(pg.mkPen(None))
+        self.plot_11.getAxis('top').setPen(pg.mkPen('k'))
         self.plot_12.setLabel('top', '实时包络谱分析图形')
         self.plot_12.getAxis('top').setStyle(tickLength=0, showValues=False)
-        self.plot_12.getAxis('top').setPen(pg.mkPen(None))
+        self.plot_12.getAxis('top').setPen(pg.mkPen('k'))
 
         self.plot_4.setLabel('top', '实时加速度波形')
         self.plot_4.getAxis('top').setStyle(tickLength=0, showValues=False)
-        self.plot_4.getAxis('top').setPen(pg.mkPen(None))
+        self.plot_4.getAxis('top').setPen(pg.mkPen('k'))
         self.plot_5.setLabel('top', '实时加速度包络图形')
         self.plot_5.getAxis('top').setStyle(tickLength=0, showValues=False)
-        self.plot_5.getAxis('top').setPen(pg.mkPen(None))
-        self.plot_13.setLabel('top', '谱峭图')
+        self.plot_5.getAxis('top').setPen(pg.mkPen('k'))
+        self.plot_13.setLabel('top', '谱峭度图形')
         self.plot_13.getAxis('top').setStyle(tickLength=0, showValues=False)
-        self.plot_13.getAxis('top').setPen(pg.mkPen(None))
-        self.plot_14.setLabel('top', '滤波后的包络谱')
+        self.plot_13.getAxis('top').setPen(pg.mkPen('k'))
+        self.plot_14.setLabel('top', '滤波后的包络图形')
         self.plot_14.getAxis('top').setStyle(tickLength=0, showValues=False)
-        self.plot_14.getAxis('top').setPen(pg.mkPen(None))
-        self.plot_15.setLabel('top', '滤波后包络谱分析图形')
+        self.plot_14.getAxis('top').setPen(pg.mkPen('k'))
+
+        self.plot_15.setLabel('top', '滤波后的包络谱分析图形')
         self.plot_15.getAxis('top').setStyle(tickLength=0, showValues=False)
-        self.plot_15.getAxis('top').setPen(pg.mkPen(None))
+        self.plot_15.getAxis('top').setPen(pg.mkPen('k'))
+
+        self.plot.getAxis('bottom').setPen(pg.mkPen('k'))
+        self.plot_2.getAxis('bottom').setPen(pg.mkPen('k'))
+        self.plot_3.getAxis('bottom').setPen(pg.mkPen('k'))
+        # self.plot.getAxis('left').setPen(pg.mkPen('k'))
+        # self.plot.getAxis('bottom').setPen(pg.mkPen(color='r'))
+        # self.plot.getAxis('left').setPen(pg.mkPen(color='g'))
 
         # self.label_7.setStyleSheet("QLabel { background-color: #FFC0CB; color: black; text-shadow: 1px 1px #000000; }")
 
@@ -329,7 +356,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
     def stackedChanged(self, index):
         if index == 0:
-            #self.timer2.stop()
+            # self.timer2.stop()
             self.timer1.start()
             self.timer.start()
             self.stackedWidget.setCurrentIndex(0)
@@ -338,7 +365,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             self.shared_data['flag'] = temp
         elif index == 1:
             self.timer.start()
-            #self.timer2.stop()
+            # self.timer2.stop()
             self.timer1.stop()
             self.stackedWidget.setCurrentIndex(1)
             temp = self.shared_data['flag']
@@ -406,8 +433,8 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                         col += 2
 
                 fic = str(round(4.5 * (1 + 0.794 / 3.904) * 1615 / 60, 1))  # = 内圈特征频率
-                foc = str(round(4.5 * (1 - 0.794 / 3.904) * 1615 / 60,1)) # = 外圈特征频率
-                fc = str(round(0.5 * (1 - 0.794 / 3.904) * 1615 / 60,1))  # = 保持架特征频率
+                foc = str(round(4.5 * (1 - 0.794 / 3.904) * 1615 / 60, 1))  # = 外圈特征频率
+                fc = str(round(0.5 * (1 - 0.794 / 3.904) * 1615 / 60, 1))  # = 保持架特征频率
                 item = QtWidgets.QTableWidgetItem(fic)
                 self.tableWidget_2.setItem(20, 1, item)
                 item = QtWidgets.QTableWidgetItem(foc)
@@ -523,15 +550,15 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                     self.plot_3.removeItem(item)
             self.plot_3.clearPlots()
 
-            self.plot.plot(xtime, xdata, pen=pg.mkPen(pg.intColor(0), width=2),
+            self.plot.plot(xtime, xdata, pen=pg.mkPen(pg.intColor(6), width=2),
                            symbol='o', symbolSize=2)
             self.plot.autoRange()
             self.plot.setRange(xRange=[0, 30000])
-            self.plot_2.plot(ytime, ydata, pen=pg.mkPen(pg.intColor(0), width=2),
+            self.plot_2.plot(ytime, ydata, pen=pg.mkPen(pg.intColor(6), width=2),
                              symbol='o', symbolSize=2)
             self.plot_2.autoRange()
             self.plot_2.setRange(xRange=[0, 30000])
-            self.plot_3.plot(ztime, zdata, pen=pg.mkPen(pg.intColor(0), width=2),
+            self.plot_3.plot(ztime, zdata, pen=pg.mkPen(pg.intColor(6), width=2),
                              symbol='o', symbolSize=2)
             self.plot_3.autoRange()
             self.plot_3.setRange(xRange=[0, 30000])
@@ -596,7 +623,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         #     fft_mag_z = fft_mag[:len(freqs) // 2]
         if len(self.shared_data['shard']) == 10240:
             if self.comboBox_6.currentText() == '内圈故障分析':
-                #print(self.shared_data['shard'])
+                # print(self.shared_data['shard'])
                 lst = [i for i in range(10240)]
                 gsdi = matlab.double(self.shared_data['shard'])
                 srdi = 6500.0
@@ -651,13 +678,14 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                 # self.plot_14.clearPlots()
 
                 # 绘制时域图
-                self.plot_9.plot(lst, self.shared_data['shard'], pen=pg.mkPen(pg.intColor(0), width=2))#,symbol='o', symbolSize=2
+                self.plot_9.plot(lst, self.shared_data['shard'],
+                                 pen=pg.mkPen(pg.intColor(6), width=1))  # ,symbol='o', symbolSize=2
                 self.plot_9.autoRange()
 
-                self.plot_10.plot(fpInner, pInner, pen=pg.mkPen(pg.intColor(0), width=2))
+                self.plot_10.plot(fpInner, pInner, pen=pg.mkPen(pg.intColor(6), width=1))
                 self.plot_10.autoRange()
 
-                self.plot_11.plot(tEnvInner, xEnvInner, pen=pg.mkPen(pg.intColor(0), width=2))
+                self.plot_11.plot(tEnvInner, xEnvInner, pen=pg.mkPen(pg.intColor(6), width=1))
                 self.plot_11.autoRange()
 
                 # # 绘制频谱图，x 轴为频率，y 轴为振幅
@@ -672,33 +700,72 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                 # self.plot_14.autoRange()
 
                 # 平方包络的傅立叶变换幅度
-                self.plot_12.plot(fEnvInner, pEnvInner, pen=pg.mkPen(pg.intColor(0), width=2))
+                self.plot_12.plot(fEnvInner, pEnvInner, pen=pg.mkPen(pg.intColor(6), width=1))
                 self.plot_12.autoRange()
-                # self.plot_13.plot(freqs_y, fft_mag_y, pen=pg.mkPen(pg.intColor(0), width=2),
+                # self.plot_13.plot(freqs_y, fft_mag_y, pen=pg.mkPen(pg.intColor(6), width=2),
                 #                   symbol='o', symbolSize=2)
                 # self.plot_13.autoRange()
-                # self.plot_14.plot(freqs_z, fft_mag_z, pen=pg.mkPen(pg.intColor(0), width=2),
+                # self.plot_14.plot(freqs_z, fft_mag_z, pen=pg.mkPen(pg.intColor(6), width=2),
                 #                   symbol='o', symbolSize=2)
                 # self.plot_14.autoRange()
             elif self.comboBox_6.currentText() == '外圈故障分析':
+               # print(self.shared_data['shard'])
                 lst = [i for i in range(10240)]
                 gsdo = matlab.double(self.shared_data['shard'])
                 srdo = 6500.0
 
                 eng = matlab.engine.start_matlab()  # 可以调用matlab的内置函数。
+                #level = 9
                 [pEnvOuter, fEnvOuter, xEnvOuter, tEnvOuter] = eng.envspectrum(gsdo, srdo,
                                                                                nargout=4)  # 包络谱分析； # fEnvInner,频率；pEnvInner,包络谱峰值； xEnvInner,包络大小，tEnvInner，时间
-                [kgram, f, w, fc, wc, BW] = eng.kurtogram(gsdo, srdo, 9.0,
+                [kgram, f, w, fc, wc, BW] = eng.kurtogram(gsdo, srdo, 7.0,
                                                           nargout=6)  # kgram 为 len(w)*len(f)的矩阵,横坐标表示频率，纵坐标表示窗长度，取值表示峭度。需要二维作图
+
+                ff = eng.linspace(0.0, srdo/2, 384)
+                max_w = float(np.max(w))
+                min_w = float(np.min(w))
+                ww = eng.linspace(max_w, min_w, 14)
+                #ww = eng.linspace(max_w, min_w, 18)
+                #ww = eng.linspace(max(w), min(w), 18)
+                self.fig, self.ax = plt.subplots(figsize=(5, 4), dpi=100)
+                X, Y = np.meshgrid(ff, ww)
+                #self.ax.contourf(X, Y, kgram, cmap=plt.cm.jet)
+                CS = self.ax.contourf(X, Y, kgram, cmap=plt.cm.jet, extend='both')
+               # 添加图例
+                self.fig.colorbar(CS)
+                #self.ax.contourf(ff, ww, kgram, cmap=plt.cm.jet)
+               # 创建 FigureCanvas 和 NavigationToolbar
+                self.canvas = FigureCanvas(self.fig)
+                self.toolbar = NavigationToolbar(self.canvas, self)
+                self.widget_6.layout().addWidget(self.canvas)
+                self.widget_6.layout().addWidget(self.toolbar)
+
                 [sk, fout] = eng.pkurtosis(gsdo, srdo, nargout=2)  # 谱峭度，sk为峭度值，fout为频率
-                bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
-                                     'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1);
-                xOuterBpf = eng.filter(bpf, gsdo, nargout=1);
+                # print(fc)
+                # print(BW)
+                # print(wc)
+                # print(kgram)
+                if (fc - BW / 2)<=0:
+                    if (fc + BW / 2)>=3250:
+                        bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
+                                             'CutoffFrequency2', 3245, 'SampleRate', srdo, nargout=1)
+                    else:
+                        bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
+                                             'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
+                else:
+                    if (fc + BW / 2) >= 3250:
+                        bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
+                                         'CutoffFrequency2', 3245, 'SampleRate', srdo, nargout=1)
+                    else:
+                        bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
+                                             'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
+
+                xOuterBpf = eng.filter(bpf, gsdo, nargout=1)
                 tmp = [[fc - BW / 2], [fc + BW / 2]]
                 [pEnvOuterBpf, fEnvOuterBpf, xEnvOuterBpf, tEnvBpfOuter] = eng.envspectrum(gsdo, srdo, 'FilterOrder',
                                                                                            200.0, 'Band',
                                                                                            matlab.double(tmp),
-                                                                                           nargout=4);
+                                                                                           nargout=4)
 
                 tEnvOuter = [item for sublist in tEnvOuter for item in sublist]
                 xEnvOuter = [item for sublist in xEnvOuter for item in sublist]
@@ -721,10 +788,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                         self.plot_5.removeItem(item)
                 self.plot_5.clearPlots()
 
-                for item in self.plot_6.items():
-                    if isinstance(item, pg.TextItem):
-                        self.plot_6.removeItem(item)
-                self.plot_6.clearPlots()
+                # for item in self.plot_6.items():
+                #     if isinstance(item, pg.TextItem):
+                #         self.plot_6.removeItem(item)
+                # self.plot_6.clearPlots()
 
                 for item in self.plot_13.items():
                     if isinstance(item, pg.TextItem):
@@ -742,24 +809,24 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                 self.plot_15.clearPlots()
 
                 self.plot_4.plot(lst, self.shared_data['shard'],
-                                 pen=pg.mkPen(pg.intColor(0), width=2))  # ,symbol='o', symbolSize=2
+                                 pen=pg.mkPen(pg.intColor(6), width=1))  # ,symbol='o', symbolSize=2
                 self.plot_4.autoRange()
 
                 self.plot_5.plot(tEnvOuter, xEnvOuter,
-                                 pen=pg.mkPen(pg.intColor(0), width=2))  # ,symbol='o', symbolSize=2
+                                 pen=pg.mkPen(pg.intColor(6), width=1))  # ,symbol='o', symbolSize=2
                 self.plot_5.autoRange()
 
-
-                self.plot_13.plot(fout, sk, pen=pg.mkPen(pg.intColor(0), width=2))
+                self.plot_13.plot(fout, sk, pen=pg.mkPen(pg.intColor(6), width=1))
                 self.plot_13.autoRange()
 
-                self.plot_14.plot(xEnvOuterBpf, tEnvBpfOuter, pen=pg.mkPen(pg.intColor(0), width=2))
+                self.plot_14.plot(tEnvBpfOuter, xEnvOuterBpf, pen=pg.mkPen(pg.intColor(6), width=1))
                 self.plot_14.autoRange()
 
-                self.plot_15.plot(pEnvOuterBpf, fEnvOuterBpf, pen=pg.mkPen(pg.intColor(0), width=2))
+                self.plot_15.plot(fEnvOuterBpf[0:1000], pEnvOuterBpf[0:1000], pen=pg.mkPen(pg.intColor(6), width=1))
                 self.plot_15.autoRange()
 
             self.timer2.stop()
+
     def showFileDialog(self):
         # 打开文件选择对话框
         file_dialog = QFileDialog()
@@ -768,6 +835,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
         # 如果有选择文件，则打印文件路径
         if file_name:
+            print(file_name)
             self.plotdata(file_name)
 
     def analysis(self):
@@ -798,10 +866,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         freo = z / 2 * (1 - (d / D) * cos) * fre1  # 外圈旋转频率 = z/2(1-d/D)*fre1
         fre2 = 0.5 * (1 - (d / D) * cos) * fre1  # 保持架旋转频率 = 0.5(1-d/D)*fre1
 
-        fre1 = str(round(fre1,1))
-        frei = str(round(frei,1))
-        freo = str(round(freo,1))
-        fre2 = str(round(fre2,1))
+        fre1 = str(round(fre1, 1))
+        frei = str(round(frei, 1))
+        freo = str(round(freo, 1))
+        fre2 = str(round(fre2, 1))
 
         item = QtWidgets.QTableWidgetItem(fre1)
         self.tableWidget_3.setItem(1, 1, item)
@@ -829,13 +897,13 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         for item in self.plot_7.items():
             if isinstance(item, pg.TextItem):
                 self.plot_7.removeItem(item)
-        self.plot_7.plot(data, pen=pg.mkPen(pg.intColor(0), width=2))
+        self.plot_7.plot(data, pen=pg.mkPen(pg.intColor(6), width=2))
         self.plot_7.autoRange()
         for item in self.plot_8.items():
             if isinstance(item, pg.TextItem):
                 self.plot_8.removeItem(item)
         self.plot_8.plot(freq[:int(len(freq) / 2)], np.abs(fft_data)[:int(len(fft_data) / 2)],
-                         pen=pg.mkPen(pg.intColor(0), width=2))
+                         pen=pg.mkPen(pg.intColor(6), width=2))
         self.plot_8.autoRange()
 
 
@@ -867,16 +935,17 @@ def getdata(shared_data):
             time.sleep(0.3)
 
         elif shared_data['flag'][0] == 2:
-            #print(shared_data['flag'])
+            # print(shared_data['flag'])
             if shared_data['flag'][1] != flag:
                 data = RS485.communcation_1024(shared_data['flag'][2])
                 if len(data) == 10240:
                     shared_data['shard'] = data
                     time.sleep(0.3)
-                    flag = flag+1
+                    flag = flag + 1
             else:
                 time.sleep(0.3)
                 pass
+
 
 if __name__ == '__main__':
     manager = Manager()
