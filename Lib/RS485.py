@@ -4,6 +4,7 @@ import datetime
 import pymysql
 import re
 import json
+import time
 # CRC16校验，返回整型数
 def crc16(veritydata):
     if not veritydata:
@@ -197,7 +198,7 @@ def mode_change(add, regadd, regval):
     send_data =mmodbus06(slaveadd, regadd, regval)
     print(send_data)
     try:
-        com = serial.Serial("com4", 9600, timeout=0.1)
+        com = serial.Serial("com4", 57600, timeout=0.1)
     except:
         return '未连接', '未连接'
     else:
@@ -210,6 +211,27 @@ def mode_change(add, regadd, regval):
         #
         com.close()
 
+def baud_change(add, regadd, regval):
+    # regadd：寄存器地址
+    # regval：写入的数
+    slaveadd = add
+    regadd = regadd
+    regval = regval
+    send_data =mmodbus06(slaveadd, regadd, regval)
+    print(send_data)
+    try:
+        com = serial.Serial("com4", 9600, timeout=0.1)
+    except:
+        return '未连接', '未连接'
+    else:
+        # starttime = time.time()
+        com.write(send_data)
+        # print(send_data)
+
+        recv_data = com.read(regval * 2 + 5)
+        print(recv_data)
+        #
+        com.close()
 # def communcation_1024():
 #     #mode_change(1, 163, 7)
 #     mode_change(1, 161, 4)
@@ -270,12 +292,13 @@ def communcation_1024(mode):
         key = "AccY"
     elif mode == 7:
         key = "AccZ"
+    baud_change(1, 163, 6)
     mode_change(1, 161, mode)
     mode_change(1, 160, 44)
     ls=[]
     data=''
     try:
-        com = serial.Serial("com4", 9600, timeout=0.1)
+        com = serial.Serial("com4", 57600, timeout=0.1)
     except:
         return '未连接', '未连接'
     else:
@@ -362,3 +385,5 @@ def restart(add, regadd, regval, funcode):
 # ls=communcation_1024()
 # print(len(ls))
 # print(ls)
+#mode_change(1, 161, 5)
+#mode_change(1, 160, 44)

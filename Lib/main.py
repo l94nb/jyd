@@ -910,21 +910,21 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             self.widget_6.layout().addWidget(self.canvas)
             self.widget_6.layout().addWidget(self.toolbar)
             [sk, fout] = eng.pkurtosis(gsdo, srdo, nargout=2)  # 谱峭度，sk为峭度值，fout为频率
-            # print(fc)
-            # print(BW)
+            print(fc)
+            print(BW)
             # print(wc)
             # print(kgram)
-            if (fc - BW / 2)<=0:
-                if (fc + BW / 2)>=3250:
+            if (fc - BW / 2)<=0.0:
+                if (fc + BW / 2)>=3245.0:
                     bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
-                                         'CutoffFrequency2', 3245, 'SampleRate', srdo, nargout=1)
+                                         'CutoffFrequency2', 3245.0, 'SampleRate', srdo, nargout=1)
                 else:
                     bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
                                          'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
             else:
-                if (fc + BW / 2) >= 3250:
+                if (fc + BW / 2) >= 3245.0:
                     bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
-                                     'CutoffFrequency2', 3245, 'SampleRate', srdo, nargout=1)
+                                     'CutoffFrequency2', 3245.0, 'SampleRate', srdo, nargout=1)
                 else:
                     bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
                                          'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
@@ -1141,7 +1141,7 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             # self.plot_14.autoRange()
 
             # 平方包络的傅立叶变换幅度
-            self.plot_19.plot(fEnvInner, pEnvInner, pen=pg.mkPen(pg.intColor(6), width=1))
+            self.plot_19.plot(fEnvInner[0:2000], pEnvInner[0:2000], pen=pg.mkPen(pg.intColor(6), width=1))
             self.plot_19.autoRange()
             # self.plot_13.plot(freqs_y, fft_mag_y, pen=pg.mkPen(pg.intColor(6), width=2),
             #                   symbol='o', symbolSize=2)
