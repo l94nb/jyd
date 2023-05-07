@@ -45,6 +45,9 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.comboBox_7.activated.connect(self.stackedChanged_7)
         self.pushButton_2.clicked.connect(self.analysis)
         self.pushButton_3.clicked.connect(self.calculate)
+        self.pushButton_4.clicked.connect(self.Modify_Xvalue)
+        self.pushButton_5.clicked.connect(self.Modify_Yvalue)
+        self.pushButton_6.clicked.connect(self.Modify_Zvalue)
         # self.showMaximized()
         # 定时器，定时更新数据
         self.timer = QTimer()
@@ -59,6 +62,10 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.timer2 = QTimer()
         self.timer2.setInterval(200)
         self.timer2.timeout.connect(self.update_plotdata_1024)
+
+        self.timer3 = QTimer()
+        self.timer3.setInterval(200)
+        self.timer3.timeout.connect(self.updateData_alarm)
 
         self.timer.start()  # 1000=1s
         self.timer1.start()
@@ -96,9 +103,16 @@ class DemoMain(QMainWindow, Ui_MainWindow):
                 '关注点5速度谱能量', '关注点6速度谱能量', '关注点7速度谱能量', '关注点8速度谱能量', '关注带1速度谱能量', '关注带2速度谱能量', '关注带3速度谱能量', '关注带4速度谱能量',
                 '关注带5速度谱能量', '速度谱最高能量点的阶次', '速度谱总能量']
 
+        ls_3 = ['故障程度', '振动能量超标', '不平衡', '耦合不对中', '机械松动', '润滑不良', '轴松动', '电气故障', '齿轮不对中', '齿啮合', '齿轮磨损', '叶片故障']
+        ls_4 = ['x轴加速度预警', 'x轴加速度报警', 'x轴速度预警', 'x轴速度报警', 'y轴加速度预警', 'y轴加速度报警', 'y轴速度预警', 'y轴速度报警', 'z轴加速度预警', 'z轴加速度报警', 'z轴速度预警', 'z轴速度报警']
+        ls_5 = ['振动加速度预警门限', '振动加速度报警门限', '振动速度预警门限', '振动速度报警门限', '振动位移预警门限', '振动位移报警门限']
+        self.ls_6 = [3, 5, 5, 7, 5, 7]
+        self.ls_7 = [3, 5, 5, 7, 5, 7]
+        self.ls_8 = [3, 5, 5, 7, 5, 7]
         self.comboBox.addItem('振动温度一体传感器时域数据')
         self.comboBox.addItem('振动温度一体传感器谱分析数据')
         self.comboBox.addItem('振动温度一体传感器分析图')
+        self.comboBox.addItem('振动温度一体传感器故障诊断报警')
 
         self.tableWidget.setRowCount(4)
         self.tableWidget.setColumnCount(12)
@@ -238,15 +252,16 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.tableWidget_4.setItem(0, 6, item)
         item = QtWidgets.QTableWidgetItem('转速')
         self.tableWidget_4.setItem(0, 8, item)
-        item = QtWidgets.QTableWidgetItem('8')
+        item = QtWidgets.QTableWidgetItem('9')
         self.tableWidget_4.setItem(0, 1, item)
-        item = QtWidgets.QTableWidgetItem('0.235')
+        item = QtWidgets.QTableWidgetItem('0.794')
         self.tableWidget_4.setItem(0, 3, item)
-        item = QtWidgets.QTableWidgetItem('1.245')
+        item = QtWidgets.QTableWidgetItem('3.904')
         self.tableWidget_4.setItem(0, 5, item)
         item = QtWidgets.QTableWidgetItem('0')
         self.tableWidget_4.setItem(0, 7, item)
         item = QtWidgets.QTableWidgetItem('1500')
+        #bug
         self.tableWidget_4.setItem(0, 9, item)
         item = QtWidgets.QTableWidgetItem('内圈旋转频率')
         self.tableWidget_4.setItem(1, 0, item)
@@ -282,7 +297,90 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.tableWidget_4.setFixedHeight(100)
         self.tableWidget_4.horizontalHeader().setMinimumSectionSize(100)
 
-        pg.setConfigOptions(antialias=True)
+        self.tableWidget_5.setRowCount(11)
+        self.tableWidget_5.setColumnCount(14)
+        # self.tableWidget_5.setHorizontalHeaderLabels(['名称1', '数值1'])
+        # 将第0行第0列和第1列单元格合并
+        self.tableWidget_5.setSpan(9, 0, 2, 1)
+        self.tableWidget_5.setSpan(7, 0, 2, 1)
+        self.tableWidget_5.setSpan(5, 0, 2, 1)
+        self.tableWidget_5.setSpan(3, 0, 2, 1)
+        item = QtWidgets.QTableWidgetItem('x轴')
+        self.tableWidget_5.setItem(0, 0, item)
+        item = QtWidgets.QTableWidgetItem('x轴')
+        self.tableWidget_5.setItem(3, 0, item)
+        item = QtWidgets.QTableWidgetItem('y轴')
+        self.tableWidget_5.setItem(1, 0, item)
+        item = QtWidgets.QTableWidgetItem('y轴')
+        self.tableWidget_5.setItem(5, 0, item)
+        item = QtWidgets.QTableWidgetItem('z轴')
+        self.tableWidget_5.setItem(2, 0, item)
+        item = QtWidgets.QTableWidgetItem('z轴')
+        self.tableWidget_5.setItem(7, 0, item)
+        item = QtWidgets.QTableWidgetItem('三轴')
+        self.tableWidget_5.setItem(9, 0, item)
+
+        self.pushButton_4 = QtWidgets.QPushButton()
+        self.pushButton_4.setText('修改x轴门限值')
+        self.tableWidget_5.setIndexWidget(self.tableWidget_5.model().index(0, 13), self.pushButton_4)
+
+        self.pushButton_5 = QtWidgets.QPushButton()
+        self.pushButton_5.setText('修改y轴门限值')
+        self.tableWidget_5.setIndexWidget(self.tableWidget_5.model().index(1, 13), self.pushButton_5)
+
+        self.pushButton_6 = QtWidgets.QPushButton()
+        self.pushButton_6.setText('修改z轴门限值')
+        self.tableWidget_5.setIndexWidget(self.tableWidget_5.model().index(2, 13), self.pushButton_6)
+
+        row = 0
+        col = 1
+        for j in range(3):
+            for i in range(len(ls_5)):
+                item = QtWidgets.QTableWidgetItem(ls_5[i])
+                self.tableWidget_5.setItem(row, col, item)
+                if col < 12:
+                    col += 2
+            row = row + 1
+            col = 1
+
+        row = 0
+        col = 2
+        for j in range(3):
+            for i in range(len(self.ls_6)):
+                item = QtWidgets.QTableWidgetItem(str(self.ls_6[i]))
+                self.tableWidget_5.setItem(row, col, item)
+                if col < 12:
+                    col += 2
+            row = row + 1
+            col = 2
+
+        row = 3
+        col = 1
+        for j in range(3):
+            for i in range(len(ls_3)):
+                item = QtWidgets.QTableWidgetItem(ls_3[i])
+                self.tableWidget_5.setItem(row, col, item)
+                if col < 12:
+                    col += 1
+            col = 1
+            row = row + 2
+        row = 9
+        col = 1
+        for i in range(len(ls_4)):
+            item = QtWidgets.QTableWidgetItem(ls_4[i])
+            self.tableWidget_5.setItem(row, col, item)
+            if col < 12:
+                col += 1
+
+        self.tableWidget_5.verticalHeader().setVisible(False)
+        self.tableWidget_5.horizontalHeader().setVisible(False)  # 行列序号取消
+        self.tableWidget_5.resizeColumnsToContents()  # 根据内容调整列宽
+        # self.tableWidget_5.resizeRowsToContents()#根据内容调整行高
+        #self.tableWidget_5.setFixedHeight(150)
+        # self.tableWidget_5.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget_5.horizontalHeader().setMinimumSectionSize(100)
+
+        pg.setConfigOptions(antialias=True)#抗锯齿功能，即使绘制的曲线更加平滑
         self.plot = pg.PlotWidget()
         self.plot_2 = pg.PlotWidget()
         self.plot_3 = pg.PlotWidget()
@@ -534,28 +632,44 @@ class DemoMain(QMainWindow, Ui_MainWindow):
 
     def stackedChanged(self, index):
         if index == 0:
-            # self.timer2.stop()
+            self.timer3.stop()
             self.timer1.start()
             self.timer.start()
             self.stackedWidget.setCurrentIndex(0)
             temp = self.shared_data['flag']
             temp[0] = 0
             self.shared_data['flag'] = temp
+
         elif index == 1:
             self.timer.start()
             # self.timer2.stop()
             self.timer1.stop()
+            self.timer3.stop()
             self.stackedWidget.setCurrentIndex(1)
             temp = self.shared_data['flag']
             temp[0] = 1
             self.shared_data['flag'] = temp
+
         elif index == 2:
             self.timer.stop()
             self.timer1.stop()
+            self.timer3.stop()
             self.stackedWidget.setCurrentIndex(2)
             # self.flag = self.flag + 1
             temp = self.shared_data['flag']
             temp[0] = 2
+            # temp[1] = self.flag
+            self.shared_data['flag'] = temp
+            # self.timer2.start()
+
+        elif index == 3:
+            self.timer.stop()
+            self.timer1.stop()
+            self.timer3.start()
+            self.stackedWidget.setCurrentIndex(3)
+            # self.flag = self.flag + 1
+            temp = self.shared_data['flag']
+            temp[0] = 3
             # temp[1] = self.flag
             self.shared_data['flag'] = temp
             # self.timer2.start()
@@ -757,6 +871,32 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             self.plot_3.autoRange()
             self.plot_3.setRange(xRange=[0, 30000])
 
+    def updateData_alarm(self):
+        if self.shared_data['shard'] is not None:
+            if len(self.shared_data['shard']) == 4:
+                ls=[[],[],[],[]]
+                data = self.shared_data['shard']
+                for i in range(4):
+                    dec_num = data[i]
+                    bin_num = bin(dec_num)[2:].zfill(16)  # 将二进制字符串前面补0至长度为16
+                    lst = [int(b) for b in bin_num]
+                    lst.reverse()
+                    ls[i] = lst[4:]
+                row = 4
+                col = 1
+                for j in range(4):
+                    for i in range(12):
+                        item = QtWidgets.QTableWidgetItem(str(ls[j][i]))
+                        if ls[j][i] == 1:
+                            item.setFont(QtGui.QFont("Arial", 20))
+                            item.setForeground(QtGui.QBrush(QtCore.Qt.red))
+                            item.setTextAlignment(QtCore.Qt.AlignCenter)
+                        self.tableWidget_5.setItem(row, col, item)
+                        if col < 12:
+                            col += 1
+                    col = 1
+                    row = row + 2
+
     def update_plotdata_1024(self):
         # if len(self.shared_data['shard']) == 3:
         #     lst = [i for i in range(1024)]
@@ -937,26 +1077,31 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             self.widget_6.layout().addWidget(self.canvas)
             self.widget_6.layout().addWidget(self.toolbar)
             [sk, fout] = eng.pkurtosis(gsdo, srdo, nargout=2)  # 谱峭度，sk为峭度值，fout为频率
-            print(fc)
-            print(BW)
-            # print(wc)
-            # print(kgram)
-            if (fc - BW / 2)<=0.0:
-                if (fc + BW / 2)>=3245.0:
-                    bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
-                                         'CutoffFrequency2', 3245.0, 'SampleRate', srdo, nargout=1)
-                else:
-                    bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
-                                         'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
-            else:
-                if (fc + BW / 2) >= 3245.0:
-                    bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
-                                     'CutoffFrequency2', 3245.0, 'SampleRate', srdo, nargout=1)
-                else:
-                    bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
-                                         'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
-
-            xOuterBpf = eng.filter(bpf, gsdo, nargout=1)
+            # print(fc)
+            # print(BW)
+            # # print(wc)
+            # # print(kgram)
+            # if (fc - BW / 2)<=0.0:
+            #     if (fc + BW / 2)>=3245.0:
+            #         bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
+            #                              'CutoffFrequency2', 3245.0, 'SampleRate', srdo, nargout=1)
+            #     else:
+            #         bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
+            #                              'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
+            # else:
+            #     if (fc + BW / 2) >= 3245.0:
+            #         bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
+            #                          'CutoffFrequency2', 3245.0, 'SampleRate', srdo, nargout=1)
+            #     else:
+            #         bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
+            #                              'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
+            #
+            # xOuterBpf = eng.filter(bpf, gsdo, nargout=1)
+            tmp = [[fc - BW / 2], [fc + BW / 2]]
+            if (fc - BW / 2) <= 0:
+                tmp[0] = [fc - BW / 4]
+            if (fc + BW / 2) >= srdo / 2:
+                tmp[1] = [srdo / 2 - 1]
             tmp = [[fc - BW / 2], [fc + BW / 2]]
             [pEnvOuterBpf, fEnvOuterBpf, xEnvOuterBpf, tEnvBpfOuter] = eng.envspectrum(gsdo, srdo, 'FilterOrder',
                                                                                        200.0, 'Band',
@@ -1033,6 +1178,66 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         if file_name:
             print(file_name)
             self.plotdata(file_name)
+
+    def Modify_Xvalue(self):
+        address = [195, 196, 201, 202, 209, 210]
+        self.timer3.stop()
+        temp = self.shared_data['flag']
+        temp[0] = -1
+        self.shared_data['flag'] = temp
+        time.sleep(0.5)
+        j = 0
+        for i in range(2,13,2):
+            val = int(self.tableWidget_5.item(0, i).text())
+            #print(val)
+            if val != self.ls_6[j]:
+                self.ls_6[j] = val
+                RS485.value_change(1, address[j], val*100)
+            j += 1
+        self.timer3.start()
+        temp = self.shared_data['flag']
+        temp[0] = 3
+        self.shared_data['flag'] = temp
+
+    def Modify_Yvalue(self):
+        address = [197, 198, 203, 204, 211, 212]
+        self.timer3.stop()
+        temp = self.shared_data['flag']
+        temp[0] = -1
+        self.shared_data['flag'] = temp
+        time.sleep(0.5)
+        j = 0
+        for i in range(2,13,2):
+            val = int(self.tableWidget_5.item(1, i).text())
+            #print(val)
+            if val != self.ls_7[j]:
+                self.ls_7[j] = val
+                RS485.value_change(1, address[j], val*100)
+            j += 1
+        self.timer3.start()
+        temp = self.shared_data['flag']
+        temp[0] = 3
+        self.shared_data['flag'] = temp
+
+    def Modify_Zvalue(self):
+        address = [199, 200, 205, 206, 213, 214]
+        self.timer3.stop()
+        temp = self.shared_data['flag']
+        temp[0] = -1
+        self.shared_data['flag'] = temp
+        time.sleep(0.5)
+        j = 0
+        for i in range(2,13,2):
+            val = int(self.tableWidget_5.item(2, i).text())
+            #print(val)
+            if val != self.ls_8[j]:
+                self.ls_8[j] = val
+                RS485.value_change(1, address[j], val*100)
+            j += 1
+        self.timer3.start()
+        temp = self.shared_data['flag']
+        temp[0] = 3
+        self.shared_data['flag'] = temp
 
     def analysis(self):
         self.flag = self.flag + 1
@@ -1238,23 +1443,30 @@ class DemoMain(QMainWindow, Ui_MainWindow):
             # print(BW)
             # print(wc)
             # print(kgram)
-            if (fc - BW / 2) <= 0:
-                if (fc + BW / 2) >= int(fs/2):
-                    bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
-                                         'CutoffFrequency2', (fs/2)-1, 'SampleRate', srdo, nargout=1)
-                else:
-                    bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
-                                         'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
-            else:
-                if (fc + BW / 2) >= (fs/2):
-                    bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
-                                         'CutoffFrequency2', (fs/2)-1, 'SampleRate', srdo, nargout=1)
-                else:
-                    bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
-                                         'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
 
-            xOuterBpf = eng.filter(bpf, gsdo, nargout=1)
+            # if fc == BW / 2:
+            # if (fc - BW / 2) <= 0:
+            #     if (fc + BW / 2) >= int(fs/2):
+            #         bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
+            #                              'CutoffFrequency2', (fs/2)-1, 'SampleRate', srdo, nargout=1)
+            #     else:
+            #         bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 4,
+            #                              'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
+            # else:
+            #     if (fc + BW / 2) >= (fs/2):
+            #         bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
+            #                              'CutoffFrequency2', (fs/2)-1, 'SampleRate', srdo, nargout=1)
+            #     else:
+            #         bpf = eng.designfilt('bandpassfir', 'FilterOrder', 200.0, 'CutoffFrequency1', fc - BW / 2,
+            #                              'CutoffFrequency2', fc + BW / 2, 'SampleRate', srdo, nargout=1)
+            #
+            # xOuterBpf = eng.filter(bpf, gsdo, nargout=1)
             tmp = [[fc - BW / 2], [fc + BW / 2]]
+            if (fc - BW / 2) <= 0:
+                tmp[0] = [fc - BW / 4]
+            if (fc + BW / 2) >= srdo/2:
+                tmp[1] = [srdo/2-1]
+
             [pEnvOuterBpf, fEnvOuterBpf, xEnvOuterBpf, tEnvBpfOuter] = eng.envspectrum(gsdo, srdo, 'FilterOrder',
                                                                                        200.0, 'Band',
                                                                                        matlab.double(tmp),
@@ -1385,6 +1597,11 @@ def getdata(shared_data):
             else:
                 time.sleep(0.3)
                 pass
+
+        elif shared_data['flag'][0] == 3:
+            data = RS485.communcation_alarm(1, 143, 4)
+            shared_data['shard'] = data
+            time.sleep(0.3)
 
 
 if __name__ == '__main__':
