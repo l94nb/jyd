@@ -387,6 +387,11 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.plot.setRange(xRange=[0, 3000], yRange=[0, 50])
         # 设置时间轴单位为毫秒
         self.plot.setLabel('bottom', 'Time', units='ms')
+
+
+        # self.plot.getAxis('bottom').grid().setPen(pg.mkPen('r', width=1, style=QtCore.Qt.SolidLine))
+        # self.plot.getAxis('left').grid().setPen(pg.mkPen('r', width=1, style=QtCore.Qt.SolidLine))
+
         # self.plot.setLabel('top', 'Top Label')
         # self.plot.getAxis('top').setStyle(tickLength=0, showValues=False)
         # self.plot.getAxis('top').setPen(pg.mkPen(None))
@@ -457,6 +462,28 @@ class DemoMain(QMainWindow, Ui_MainWindow):
         self.plot_23.setLabel('top', '滤波后的包络谱分析图形')
         self.plot_23.getAxis('top').setStyle(tickLength=0, showValues=False)
         self.plot_23.getAxis('top').setPen(pg.mkPen('k'))
+
+        self.plot.showGrid(x=True, y=True)
+        self.plot_3.showGrid(x=True, y=True)
+        self.plot_2.showGrid(x=True, y=True)
+        self.plot_4.showGrid(x=True, y=True)
+        self.plot_5.showGrid(x=True, y=True)
+        self.plot_7.showGrid(x=True, y=True)
+        self.plot_8.showGrid(x=True, y=True)
+        self.plot_9.showGrid(x=True, y=True)
+        self.plot_10.showGrid(x=True, y=True)
+        self.plot_11.showGrid(x=True, y=True)
+        self.plot_12.showGrid(x=True, y=True)
+        self.plot_13.showGrid(x=True, y=True)
+        self.plot_14.showGrid(x=True, y=True)
+        self.plot_15.showGrid(x=True, y=True)
+        self.plot_16.showGrid(x=True, y=True)
+        self.plot_17.showGrid(x=True, y=True)
+        self.plot_18.showGrid(x=True, y=True)
+        self.plot_19.showGrid(x=True, y=True)
+        self.plot_21.showGrid(x=True, y=True)
+        self.plot_22.showGrid(x=True, y=True)
+        self.plot_23.showGrid(x=True, y=True)
 
 
         self.plot.getAxis('bottom').setPen(pg.mkPen('k'))
